@@ -320,5 +320,6 @@ public class Unit {
 	 */
 	private int toughness;
 	
+	/* END Toughness*/
 
 }
