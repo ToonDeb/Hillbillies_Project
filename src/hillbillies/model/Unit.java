@@ -457,6 +457,22 @@ public class Unit {
 	
 	/* END Stamina */
 	
+	/* Work */
+	public void work() {
+		this.workTimeRemaining = (double) 500.0d/strength;
+	}
 	
+	public double getWorkTimeRemaining(){
+		return this.workTimeRemaining;
+	}
 	
+	public boolean isWorking(){
+		return (this.getWorkTimeRemaining()==0);
+	}
+	
+	public void workTimePassed(double time){
+		this.workTimeRemaining = this.getWorkTimeRemaining() - time;
+	}
+	
+	private double workTimeRemaining;
 }
