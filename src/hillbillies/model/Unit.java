@@ -16,7 +16,14 @@ import be.kuleuven.cs.som.annotate.*;
  * 			| isValidAgility(getAgility())
  * @invar  The toughness of each Unit must be a valid toughness for any
  *         Unit.
- *       	| isValidToughness(getToughness())	 
+ *       	| isValidToughness(getToughness())	
+ *       
+ * @invar  The hitpoints of each Unit must be a valid hitpoints for this
+ *         Unit.
+ *       	| isValidHP(getHP())
+ * @invar  The stamina of each Unit must be a valid stamina for any
+ *         Unit.
+ *       	| isValidStamina(getStamina())
  * 
  * @author Toon
  * @version 0.1
@@ -28,7 +35,7 @@ public class Unit {
 	 * 
 	 * @param  strength
 	 *         The strength for this new Unit.
-	 * @post   If the given strength is a valid strength for any Unit,
+	 * @post   If the given strength is a valid strength for any starting Unit,
 	 *         the strength of this new Unit is equal to the given
 	 *         strength. Otherwise, the strength of this new Unit is equal
 	 *         to 25.
@@ -38,7 +45,7 @@ public class Unit {
 	 * 
 	 * @param  agility
 	 *         The agility for this new Unit.
-	 * @post   If the given agility is a valid agility for any Unit,
+	 * @post   If the given agility is a valid agility for any starting Unit,
 	 *         the agility of this new Unit is equal to the given
 	 *         agility. Otherwise, the agility of this new Unit is equal
 	 *         to 25.
@@ -48,7 +55,7 @@ public class Unit {
 	 *       
 	 * @param  weight
 	 *         The weight for this new Unit.
-	 * @post   If the given weight is a valid weight for any Unit,
+	 * @post   If the given weight is a valid weight for any starting Unit,
 	 *         the weight of this new Unit is equal to the given
 	 *         weight. Otherwise, the weight of this new Unit is equal
 	 *         to 25.
@@ -58,15 +65,31 @@ public class Unit {
 	 *       
 	 * @param  toughness
 	 *         The toughness for this new Unit.
-	 * @post   If the given toughness is a valid toughness for any Unit,
+	 * @post   If the given toughness is a valid toughness for any starting Unit,
 	 *         the toughness of this new Unit is equal to the given
 	 *         toughness. Otherwise, the toughness of this new Unit is equal
 	 *         to 25.
 	 *       | if (isValidStartToughness(toughness))
 	 *       |   then new.getToughness() == toughness
 	 *       |   else new.getToughness() == 25
+	 *       
+	 * @param  stamina
+ 	 *         The stamina for this new Unit.
+ 	 * @pre    toughness and weight are valid.
+	 * 		 | isValidToughness(toughness) && isValidWeight(weight)  
+ 	 * @post   The stamina of this new Unit is equal to the given
+	 *         stamina.
+	 *       | new.getStamina() == 200*(weight()/100)*(toughness()/100)
+	 *       
+	 * @param  hp
+	 *         The hitpoints for this new Unit.
+	 * @pre    toughness and weight are valid.
+	 * 		 | isValidToughness(toughness) && isValidWeight(weight)       
+	 * @post   The hitpoints of this new Unit is equal to the given
+	 *         hitpoints.
+	 *       | new.getHP() == 200*(weight/100)*(toughness/100)
 	 */
-	public Unit(int strength, int agility, int weight, int toughness) {
+	public Unit(int weight, int strength, int agility, int toughness) {
 		if (! isValidStartStrength(strength))
 			strength = 25;
 		setStrength(strength);
@@ -79,6 +102,8 @@ public class Unit {
 		if (! isValidStartToughness(toughness))
 			toughness = 25;
 		setToughness(toughness);
+		this.setHP(this.getMaxHP());
+		this.setStamina(this.getMaxStamina());
 	}
 	
 	/* Weight */
@@ -92,7 +117,7 @@ public class Unit {
 	
 	/**
 	 * Check whether the given weight is a valid weight for
-	 * any Unit.
+	 * this Unit.
 	 *  
 	 * @param  weight
 	 *         The weight to check.
@@ -107,7 +132,7 @@ public class Unit {
 	
 	/**
 	 * Check whether the given weight is a valid weight for
-	 * the initialization of any Unit
+	 * the initialization of this Unit
 	 * 
 	 * @param 	weight
 	 * 			The weight to check
@@ -262,8 +287,8 @@ public class Unit {
 	
 	/* END Agility */
 	
+	
 	/*Toughness*/
-
 	/**
 	 * Return the toughness of this Unit.
 	 */
@@ -320,5 +345,118 @@ public class Unit {
 	 */
 	private int toughness;
 	
+	/* END Toughness */
+	
+	
+	/* HP */
+	/**
+	 * Return the hitpoints of this Unit.
+	 */
+	@Basic @Raw
+	public int getHP() {
+		return this.hp;
+	}
+	
+	/**
+	 * Return the maximum hitpoints of this Unit.
+	 */
+	public int getMaxHP(){
+		return (int) Math.ceil(200*(this.getWeight()/100.0)*(this.getToughness()/100.0));
+	}
 
+	/**
+	 * Check whether the given hitpoints is a valid hitpoints for
+	 * this Unit.
+	 *  
+	 * @param  hitpoints
+	 *         The hitpoints to check.
+	 * @return 
+	 *       | ((0 <= hp) && (hp <= this.getMaxHP))
+	*/
+	public boolean isValidHP(int hp) {
+		return (0 <= hp) && (hp <= this.getMaxHP());
+	}
+
+	/**
+	 * Set the hitpoints of this Unit to the given hitpoints.
+	 * 
+	 * @param  hp
+	 *         The new hitpoints for this Unit.
+	 * @pre    The given hitpoints must be a valid hitpoints for this
+	 *         Unit.
+	 *       | isValidHP(hp)
+	 * @post   The hitpoints of this Unit is equal to the given
+	 *         hitpoints.
+	 *       | new.getHP() == hp
+	 */
+	@Raw
+	public void setHP(int hp) {
+		assert isValidHP(hp);
+		this.hp = hp;
+	}
+
+	/**
+	 * Variable registering the hitpoints of this Unit.
+	 */
+	private int hp;
+	
+	/* END HP */
+	
+	
+	/* Stamina */
+	/**
+	 * Return the stamina of this Unit.
+	 */
+	@Basic @Raw
+	public int getStamina() {
+		return this.stamina;
+	}
+	
+	/**
+	 * Return the maximum stamina of this Unit
+	 */
+	public int getMaxStamina() {
+		return this.getMaxHP();
+	}
+	
+	/**
+	 * Check whether the given stamina is a valid stamina for
+	 * this Unit.
+	 *  
+	 * @param  stamina
+	 *         The stamina to check.
+	 * @return 
+	 *       |  ((0 <= stamina) && (stamina <= this.getMaxStamina))
+	*/
+	public boolean isValidStamina(int stamina) {
+		return ((0 <= stamina) && (stamina <= this.getMaxStamina()));
+	}
+	
+	/**
+	 * Set the stamina of this Unit to the given stamina.
+	 * 
+	 * @param  stamina
+	 *         The new stamina for this Unit.
+	 * @pre    The given stamina must be a valid stamina for any
+	 *         Unit.
+	 *       | isValidStamina(stamina)
+	 * @post   The stamina of this Unit is equal to the given
+	 *         stamina.
+	 *       | new.getStamina() == stamina
+	 */
+	@Raw
+	public void setStamina(int stamina) {
+		assert isValidStamina(stamina);
+		this.stamina = stamina;
+	}
+	
+	/**
+	 * Variable registering the stamina of this Unit.
+	 */
+	private int stamina;
+	
+	/* END Stamina */
+	
+	
+	
 }
