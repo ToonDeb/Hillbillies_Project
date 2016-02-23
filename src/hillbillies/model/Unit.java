@@ -1,6 +1,7 @@
 package hillbillies.model;
 
 import be.kuleuven.cs.som.annotate.*;
+import ogp.framework.util.Util;
 
 /**
  * A class for Units
@@ -24,6 +25,10 @@ import be.kuleuven.cs.som.annotate.*;
  * @invar  The stamina of each Unit must be a valid stamina for any
  *         Unit.
  *       	| isValidStamina(getStamina())
+ *       
+ * @invar  The workTime of each Unit must be a valid workTime for any
+ *         Unit.
+ *       | isValidWorkTime(getWorkTime())
  * 
  * @author Toon
  * @version 0.1
@@ -31,7 +36,7 @@ import be.kuleuven.cs.som.annotate.*;
 public class Unit {
 	
 	/**
-	 * Initialize this new Unit with given strength, agility, weight and .
+	 * Initialize this new Unit with given strength, agility, weight and toughness.
 	 * 
 	 * @param  strength
 	 *         The strength for this new Unit.
@@ -88,8 +93,14 @@ public class Unit {
 	 * @post   The hitpoints of this new Unit is equal to the given
 	 *         hitpoints.
 	 *       | new.getHP() == 200*(weight/100)*(toughness/100)
+	 *       
+	 * @param  worktime
+	 *         The workTime for this new Unit.
+	 * @throws WorkTimeException 
+	 * @effect The workTime of this new Unit is set to 0
+	 *       | this.setWorkTime(0)
 	 */
-	public Unit(int weight, int strength, int agility, int toughness) {
+	public Unit(int weight, int strength, int agility, int toughness) throws WorkTimeException {
 		if (! isValidStartStrength(strength))
 			strength = 25;
 		setStrength(strength);
@@ -104,6 +115,7 @@ public class Unit {
 		setToughness(toughness);
 		this.setHP(this.getMaxHP());
 		this.setStamina(this.getMaxStamina());
+		this.setWorkTime(0d);
 	}
 	
 	/* Weight */
@@ -122,7 +134,7 @@ public class Unit {
 	 * @param  weight
 	 *         The weight to check.
 	 * @return 
-	 *       | ((1 < weight) && (weight < 200))
+	 *       | result == ((1 < weight) && (weight < 200))
 	 *       && (weight >= (this.getStrength() + this.getAgility())/2))
 	 */
 	public boolean isValidWeight(int weight) {
@@ -137,7 +149,7 @@ public class Unit {
 	 * @param 	weight
 	 * 			The weight to check
 	 * @return 
-	 *		|((25 <= weight) && (weight <= 100) 
+	 *		| result == ((25 <= weight) && (weight <= 100) 
 	 * 		&& (weight >= (this.getStrength() + this.getAgility())/2))
 	 */
 	public boolean isValidStartWeight(int weight){
@@ -186,7 +198,7 @@ public class Unit {
 	 * @param  strength
 	 *         The strength to check.
 	 * @return 
-	 *       | ((1 < strength) && (strength < 200))
+	 *       | result == ((1 < strength) && (strength < 200))
 	*/
 	public static boolean isValidStrength(int strength) {
 		return ((0 < strength) && (strength <= 200));
@@ -198,7 +210,8 @@ public class Unit {
 	 * 
 	 * @param 	strength
 	 * 			The strength to check
-	 * @return ((25 <= strength) && (strength <= 100))
+	 * @return 
+	 * 			| result == ((25 <= strength) && (strength <= 100))
 	 */
 	public static boolean isValidStartStrength(int strength){
 		return ((25 <= strength) && (strength <= 100));
@@ -245,7 +258,7 @@ public class Unit {
 	 * @param  agility
 	 *         The agility to check.
 	 * @return 
-	 *       | ((1 < agility) && (agility < 200))
+	 *       | result == ((1 < agility) && (agility < 200))
 	*/
 	public static boolean isValidAgility(int agility) {
 		return ((0 < agility) && (agility <= 200));
@@ -257,7 +270,8 @@ public class Unit {
 	 * 
 	 * @param 	strength
 	 * 			The strength to check
-	 * @return ((25 <= strength) && (strength <= 100))
+	 * @return 
+	 * 			| result == ((25 <= strength) && (strength <= 100))
 	 */
 	public static boolean isValidStartAgility(int agility){
 		return ((25 <= agility) && (agility <= 100));
@@ -304,10 +318,10 @@ public class Unit {
 	 * @param  toughness
 	 *         The toughness to check.
 	 * @return 
-	 *       | result == 
+	 *       | result == ((25 <= toughness) && (toughness <= 100))
 	*/
 	public static boolean isValidToughness(int toughness) {
-		return false;
+		return ((25 <= toughness) && (toughness <= 100));
 	}
 	
 	/**
@@ -317,7 +331,7 @@ public class Unit {
 	 * @param 	toughness
 	 * 			The weight to check
 	 * @return 
-	 *		|((25 <= weight) && (weight <= 100) 
+	 *		| result == ((25 <= weight) && (weight <= 100) 
 	 */
 	public boolean isValidStartToughness(int toughness){
 		return ((25 <= toughness) && (toughness <= 100));
@@ -371,7 +385,7 @@ public class Unit {
 	 * @param  hitpoints
 	 *         The hitpoints to check.
 	 * @return 
-	 *       | ((0 <= hp) && (hp <= this.getMaxHP))
+	 *       | result == ((0 <= hp) && (hp <= this.getMaxHP))
 	*/
 	public boolean isValidHP(int hp) {
 		return (0 <= hp) && (hp <= this.getMaxHP());
@@ -426,7 +440,7 @@ public class Unit {
 	 * @param  stamina
 	 *         The stamina to check.
 	 * @return 
-	 *       |  ((0 <= stamina) && (stamina <= this.getMaxStamina))
+	 *       |  result == ((0 <= stamina) && (stamina <= this.getMaxStamina))
 	*/
 	public boolean isValidStamina(int stamina) {
 		return ((0 <= stamina) && (stamina <= this.getMaxStamina()));
@@ -457,6 +471,111 @@ public class Unit {
 	
 	/* END Stamina */
 	
+	/* Work */
 	
+	/**
+	 * Start the work-condition
+	 * @throws WorkTimeException
+	 *         The given workTime is not a valid workTime for any
+	 *         Unit.
+	 *       | ! isValidWorkTime(getWorkTime())
+	 */
+	public void work() throws WorkTimeException {
+		this.setWorkTime((double) 500.0d/strength);
+	}
+
+	/**
+	 * Return the workTime of this Unit.
+	 */
+	@Basic @Raw
+	public double getWorkTime() {
+		return this.worktime;
+	}
 	
+	/**
+	 * Return the work status of this Unit. (True if Unit is currently working)
+	 */
+	@Basic
+	public boolean getWork(){
+		return (!Util.fuzzyEquals(this.getWorkTime(), 0));
+	}
+	
+	/**
+	 * Check whether the given workTime is a valid workTime for
+	 * any Unit.
+	 *  
+	 * @param  workTime
+	 *         The workTime to check.
+	 * @return 
+	 *       | result == (worktime >= 0)
+	*/
+	public static boolean isValidWorkTime(double worktime) {
+		return Util.fuzzyGreaterThanOrEqualTo(worktime, 0);
+	}
+
+	/**
+	 * Set the workTime of this Unit to the given workTime.
+	 * 
+	 * @param  worktime
+	 *         The new workTime for this Unit.
+	 * @post   The workTime of this new Unit is equal to
+	 *         the given workTime.
+	 *       | new.getWorkTime() == worktime
+	 * @throws WorkTimeException
+	 *         The given workTime is not a valid workTime for any
+	 *         Unit.
+	 *       | ! isValidWorkTime(getWorkTime())
+	 */
+	@Raw
+	public void setWorkTime(double worktime) throws WorkTimeException {
+		if (! isValidWorkTime(worktime)) 
+			throw new WorkTimeException(worktime);
+		this.worktime = worktime;
+	}
+	
+	/**
+	 * Reduces the worktime with time
+	 * 
+	 * @param 	time
+	 * 			The time to be subtracted from worktime
+	 * @throws 	TimeException
+	 * 			The given time is not a valid time for any Unit.
+	 * @throws 	WorkTimeException 
+*	 * 			The new time is not a valid time for any Unit.
+	 */
+	public void advanceWorkTime(double time) throws TimeException, WorkTimeException{
+		if (! isValidTime(time))
+				throw new TimeException(time);
+		double newWorkTime = this.getWorkTime() - time;
+		if (Util.fuzzyLessThanOrEqualTo(newWorkTime , 0))
+			this.setWorkTime(0);
+		else
+			this.setWorkTime(newWorkTime);
+	}
+
+	/**
+	 * Variable registering the workTime of this Unit. Default value 0.
+	 */
+	private double worktime = 0;
+	
+	/* END Work */
+	
+	/* AdvanceTime */
+	
+	/**
+	 * Check whether the given time is valid for any Unit
+	 * 
+	 * @param 	time
+	 * 			The time to check.
+	 * @return
+	 * 			| result == ((time > 0) && (time < 0.2))
+	 */
+	public static boolean isValidTime(double time){
+		if ((time > 0) && (time < 0.2))
+			return true;
+		else
+			return false;
+	}
+	
+	/* END AdvanceTime */
 }
