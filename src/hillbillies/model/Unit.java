@@ -6,6 +6,10 @@ import ogp.framework.util.Util;
 /**
  * A class for Units
  * 
+ * @invar  The position of each Unit must be a valid position for any
+ *         Unit.
+ *       | isValidPosition(getPosition())
+ * 
  * @invar  The weight of each Unit must be a valid weight for any
  *        	Unit.
  *	  		| isValidWeight(getWeight())
@@ -36,8 +40,16 @@ import ogp.framework.util.Util;
 public class Unit {
 	
 	/**
-	 * Initialize this new Unit with given strength, agility, weight and toughness.
+	 * Initialize this new Unit with given position, strength, agility, weight and toughness.
 	 * 
+	 *
+	 *
+	 * @param  position
+	 *         The position for this new Unit.
+	 * @effect The position of this new Unit is set to
+	 *         the given position.
+	 *       | this.setPosition(position)
+	 *       
 	 * @param  strength
 	 *         The strength for this new Unit.
 	 * @post   If the given strength is a valid strength for any starting Unit,
@@ -96,11 +108,13 @@ public class Unit {
 	 *       
 	 * @param  worktime
 	 *         The workTime for this new Unit.
-	 * @throws WorkTimeException 
+	 * @throws WorkTimeException //TODO:afwerken
 	 * @effect The workTime of this new Unit is set to 0
 	 *       | this.setWorkTime(0)
 	 */
-	public Unit(int weight, int strength, int agility, int toughness) throws WorkTimeException {
+	public Unit(double[] position, int weight, int strength, int agility, int toughness) 
+			throws IllegalPositionException, WorkTimeException {
+		
 		if (! isValidStartStrength(strength))
 			strength = 25;
 		setStrength(strength);
@@ -116,7 +130,73 @@ public class Unit {
 		this.setHP(this.getMaxHP());
 		this.setStamina(this.getMaxStamina());
 		this.setWorkTime(0d);
+		this.setPosition(position);
 	}
+	
+	/* Position */
+
+
+
+	/**
+	 * Return the position of this Unit.
+	 */
+	@Basic @Raw
+	public double[] getPosition() {
+		return this.position;
+	}
+	//TODO:isValidPosition
+	/**
+	 * Check whether the given position is a valid position for
+	 * any Unit.
+	 *  
+	 * @param  position
+	 *         The position to check.
+	 * @return 
+	 *       | result == 
+	*/
+	public static boolean isValidPosition(double[] position) {
+		return false;
+	}
+
+	/**
+	 * Set the position of this Unit to the given position.
+	 * 
+	 * @param  position
+	 *         The new position for this Unit.
+	 * @post   The position of this new Unit is equal to
+	 *         the given position.
+	 *       | new.getPosition() == position
+	 * @throws IllegalPositionException
+	 *         The given position is not a valid position for any
+	 *         Unit.
+	 *       | ! isValidPosition(getPosition())
+	 */
+	@Raw
+	public void setPosition(double[] position) throws IllegalPositionException {
+		if (! isValidPosition(position))
+			throw new IllegalPositionException(position);
+		this.position = position;
+	}
+
+	/**
+	 * Variable registering the position of this Unit.
+	 */
+	private double[] position;
+		
+	/** TODO:canAttack
+	 * Check whether this Unit can attack the other Unit
+	 * 
+	 * @param 	other
+	 * 			the unit being attacked
+	 * @return	
+	 * 			|
+	 */
+	public boolean canAttack(Unit other){
+		return true;
+	}
+	
+	/* END Position */
+	
 	
 	/* Weight */
 	/**
@@ -433,7 +513,7 @@ public class Unit {
 		return this.getMaxHP();
 	}
 	
-	/**
+	/** 
 	 * Check whether the given stamina is a valid stamina for
 	 * this Unit.
 	 *  
@@ -560,9 +640,97 @@ public class Unit {
 	
 	/* END Work */
 	
-	/* AdvanceTime */
 	
+	/* Attack */
 	/**
+	 * This Unit attacks the Other Unit
+	 * 
+	 * @param   other
+	 * 			the Unit being attacked
+	 * @throws	IllegalAttackException
+	 * 			The Unit being attacked is not in a valid position
+	 */
+	public void attack(Unit other) throws IllegalAttackException{
+		if (! this.canAttack(other))
+			throw new IllegalAttackException(this.getPosition(),other.getPosition());
+		this.startAttackCountdown()
+		
+		
+	}
+	
+	/** TO BE ADDED TO CLASS HEADING
+	 * @invar  The attackCountDown of each Unit must be a valid attackCountDown for any
+	 *         Unit.
+	 *       | isValidAttackCountDown(getAttackCountDown())
+	 */
+
+
+/**
+ * Initialize this new Unit with given attackCountDown.
+ *
+ * @param  attackCountDown
+ *         The attackCountDown for this new Unit.
+ * @effect The attackCountDown of this new Unit is set to
+ *         the given attackCountDown.
+ *       | this.setAttackCountDown(attackCountDown)
+ */
+public Unit(double attackCountDown)
+		throws IllegalAttackCountDownException {
+	this.setAttackCountDown(attackCountDown);
+}
+
+
+/**
+ * Return the attackCountDown of this Unit.
+ */
+@Basic @Raw
+public double getAttackCountDown() {
+	return this.attackCountDown;
+}
+
+/**
+ * Check whether the given attackCountDown is a valid attackCountDown for
+ * any Unit.
+ *  
+ * @param  attackCountDown
+ *         The attackCountDown to check.
+ * @return 
+ *       | result == 
+*/
+public static boolean isValidAttackCountDown(double attackCountDown) {
+	return false;
+}
+
+/**
+ * Set the attackCountDown of this Unit to the given attackCountDown.
+ * 
+ * @param  attackCountDown
+ *         The new attackCountDown for this Unit.
+ * @post   The attackCountDown of this new Unit is equal to
+ *         the given attackCountDown.
+ *       | new.getAttackCountDown() == attackCountDown
+ * @throws IllegalAttackCountDownException
+ *         The given attackCountDown is not a valid attackCountDown for any
+ *         Unit.
+ *       | ! isValidAttackCountDown(getAttackCountDown())
+ */
+@Raw
+public void setAttackCountDown(double attackCountDown) 
+		throws IllegalAttackCountDownException {
+	if (! isValidAttackCountDown(attackCountDown))
+		throw new IllegalAttackCountDownException();
+	this.attackCountDown = attackCountDown;
+}
+
+/**
+ * Variable registering the attackCountDown of this Unit.
+ */
+private double attackCountDown;
+	/* END Attack */
+	
+	
+	/* AdvanceTime */
+	/** TODO: fuzzyequals gebruiken misschien
 	 * Check whether the given time is valid for any Unit
 	 * 
 	 * @param 	time

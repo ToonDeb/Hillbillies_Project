@@ -15,7 +15,7 @@ import be.kuleuven.cs.som.annotate.*;
 public class WorkTimeException extends Exception {
 	
 	/**
-	 * Initialize this new worktime exception with given operands
+	 * Initialize this new worktime exception with given time
 	 * 
 	 * @param worktime
 	 * 		  The value for this new illegal worktime
@@ -31,7 +31,7 @@ public class WorkTimeException extends Exception {
 	 * Return the value registered for this illegal worktime exception.
 	 */
 	@Basic @Immutable
-	public double getValue() {
+	public double getWorkTime() {
 		return this.worktime;
 	}
 	
