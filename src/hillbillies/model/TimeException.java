@@ -7,7 +7,10 @@ import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
 
 /**
+ * A class for signaling illegal time
+ * 
  * @author LaptopToon
+ * @version 0.1
  *
  */
 public class TimeException extends Exception {
