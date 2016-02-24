@@ -16,9 +16,9 @@ import be.kuleuven.cs.som.annotate.Immutable;
 public class TimeException extends Exception {
 	
 	/**
-	 * Initialize this new time exception with given operands
+	 * Initialize this new time exception with given time
 	 * 
-	 * @param worktime
+	 * @param time
 	 * 		  The value for this new illegal time
 	 * @post  The value of this new illegal time exception is equal
 	 *        to the given value.
@@ -29,7 +29,7 @@ public class TimeException extends Exception {
 	}
 	
 	/**
-	 * Return the value registered for this illegal worktime exception.
+	 * Return the value registered for this illegal time exception.
 	 */
 	@Basic @Immutable
 	public double getValue() {

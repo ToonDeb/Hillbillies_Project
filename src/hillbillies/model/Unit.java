@@ -6,18 +6,22 @@ import ogp.framework.util.Util;
 /**
  * A class for Units
  * 
+ * @invar  The position of each Unit must be a valid position for any
+ *         Unit.
+ *       | isValidPosition(getPosition())
+ * 
  * @invar  The weight of each Unit must be a valid weight for any
  *        	Unit.
  *	  		| isValidWeight(getWeight())
  * @invar  The strength of each Unit must be a valid strength for any
  *			Unit.
- *      	| isValidStrength(getStrength())
+ *      	| isValidUnitAttribute(getStrength())
  * @invar  The agility of each Unit must be a valid agility for any
  * 			Unit.
- * 			| isValidAgility(getAgility())
+ * 			| isValidUnitAttribute(getAgility())
  * @invar  The toughness of each Unit must be a valid toughness for any
  *         Unit.
- *       	| isValidToughness(getToughness())	
+ *       	| isValidUnitAttribute(getToughness())	
  *       
  * @invar  The hitpoints of each Unit must be a valid hitpoints for this
  *         Unit.
@@ -29,6 +33,10 @@ import ogp.framework.util.Util;
  * @invar  The workTime of each Unit must be a valid workTime for any
  *         Unit.
  *       | isValidWorkTime(getWorkTime())
+ *       
+ * @invar  The attackCountDown of each Unit must be a valid attackCountDown for any
+ *         Unit.
+ *       | isValidAttackCountDown(getAttackCountDown())
  * 
  * @author Toon
  * @version 0.1
@@ -36,15 +44,23 @@ import ogp.framework.util.Util;
 public class Unit {
 	
 	/**
-	 * Initialize this new Unit with given strength, agility, weight and toughness.
+	 * Initialize this new Unit with given position, strength, agility, weight and toughness.
 	 * 
+	 *
+	 *
+	 * @param  position
+	 *         The position for this new Unit.
+	 * @effect The position of this new Unit is set to
+	 *         the given position.
+	 *       | this.setPosition(position)
+	 *       
 	 * @param  strength
 	 *         The strength for this new Unit.
 	 * @post   If the given strength is a valid strength for any starting Unit,
 	 *         the strength of this new Unit is equal to the given
 	 *         strength. Otherwise, the strength of this new Unit is equal
 	 *         to 25.
-	 *       | if (isValidStartStrength(strength))
+	 *       | if (isValidStartAttribute(strength))
 	 *       |   then new.getStrength() == strength
 	 *       |   else new.getStrength() == 25
 	 * 
@@ -54,7 +70,7 @@ public class Unit {
 	 *         the agility of this new Unit is equal to the given
 	 *         agility. Otherwise, the agility of this new Unit is equal
 	 *         to 25.
-	 *       | if (isValidStartAgility(agility))
+	 *       | if (isValidStartAttribute(agility))
 	 *       |   then new.getAgility() == agility
 	 *       |   else new.getAgility() == 25
 	 *       
@@ -74,10 +90,10 @@ public class Unit {
 	 *         the toughness of this new Unit is equal to the given
 	 *         toughness. Otherwise, the toughness of this new Unit is equal
 	 *         to 25.
-	 *       | if (isValidStartToughness(toughness))
+	 *       | if (isValidStartAttribute(toughness))
 	 *       |   then new.getToughness() == toughness
 	 *       |   else new.getToughness() == 25
-	 *       
+	 * xxxxxxxxxxONNODIGxxxxxxxxx       
 	 * @param  stamina
  	 *         The stamina for this new Unit.
  	 * @pre    toughness and weight are valid.
@@ -85,7 +101,7 @@ public class Unit {
  	 * @post   The stamina of this new Unit is equal to the given
 	 *         stamina.
 	 *       | new.getStamina() == 200*(weight()/100)*(toughness()/100)
-	 *       
+	 *   
 	 * @param  hp
 	 *         The hitpoints for this new Unit.
 	 * @pre    toughness and weight are valid.
@@ -93,29 +109,117 @@ public class Unit {
 	 * @post   The hitpoints of this new Unit is equal to the given
 	 *         hitpoints.
 	 *       | new.getHP() == 200*(weight/100)*(toughness/100)
-	 *       
-	 * @param  worktime
-	 *         The workTime for this new Unit.
-	 * @throws WorkTimeException 
-	 * @effect The workTime of this new Unit is set to 0
-	 *       | this.setWorkTime(0)
+	 * xxxxxxxxxxONNODIGxxxxxxxxx    
 	 */
-	public Unit(int weight, int strength, int agility, int toughness) throws WorkTimeException {
-		if (! isValidStartStrength(strength))
+	public Unit(double[] position, int weight, int strength, int agility, int toughness) 
+			throws IllegalArgumentException {
+		
+		if (! isValidStartAttribute(strength))
 			strength = 25;
 		setStrength(strength);
-		if (! isValidStartAgility(agility))
+		if (! isValidStartAttribute(agility))
 			agility = 25;
 		setAgility(agility);
 		if (! isValidStartWeight(weight))
 			weight = 25;
 		setAgility(weight);
-		if (! isValidStartToughness(toughness))
+		if (! isValidStartAttribute(toughness))
 			toughness = 25;
 		setToughness(toughness);
 		this.setHP(this.getMaxHP());
 		this.setStamina(this.getMaxStamina());
-		this.setWorkTime(0d);
+		this.setPosition(position);
+	}
+	
+	/* Position */
+
+
+
+	/**
+	 * Return the position of this Unit.
+	 */
+	@Basic @Raw
+	public double[] getPosition() {
+		return this.position;
+	}
+	//TODO:isValidPosition
+	/**
+	 * Check whether the given position is a valid position for
+	 * any Unit.
+	 *  
+	 * @param  position
+	 *         The position to check.
+	 * @return 
+	 *       | result == 
+	*/
+	public static boolean isValidPosition(double[] position) {
+		return false;
+	}
+
+	/**
+	 * Set the position of this Unit to the given position.
+	 * 
+	 * @param  position
+	 *         The new position for this Unit.
+	 * @post   The position of this new Unit is equal to
+	 *         the given position.
+	 *       | new.getPosition() == position
+	 * @throws IllegalArgumentException
+	 *         The given position is not a valid position for any
+	 *         Unit.
+	 *       | ! isValidPosition(getPosition())
+	 */
+	@Raw
+	public void setPosition(double[] position) throws IllegalArgumentException {
+		if (! isValidPosition(position))
+			throw new IllegalArgumentException("the given position is not a valid");
+		this.position = position;
+	}
+
+	/**
+	 * Variable registering the position of this Unit.
+	 */
+	private double[] position;
+		
+	/** TODO:canAttack
+	 * Check whether this Unit can attack the other Unit
+	 * 
+	 * @param 	other
+	 * 			the unit being attacked
+	 * @return	
+	 * 			|
+	 */
+	public boolean canAttack(Unit other){
+		return true;
+	}
+	
+	/* END Position */
+	
+	/* Attributes */
+	/**
+	 * Check whether the given attribute is a valid attribute for
+	 * any Unit.
+	 *  
+	 * @param  attribute
+	 *         The attribute to check.
+	 * @return 
+	 *       | result == ((1 <= attribute) && (attribute < 200))
+	*/
+	public static boolean isValidUnitAttribute(int attribute) {
+		return ((1 <= attribute) && (attribute <= 200));
+	}
+	
+	/**
+	 * Check whether the given attribute is a valid attribute for
+	 * the initialization of any Unit
+	 * 
+	 * @param 	toughness
+	 * 			The attribute to check
+	 * @return 
+	 *		| result == ((25 <= attribute) && (attribute <= 100) 
+	 */
+	public boolean isValidStartAttribute(int attribute){
+		return ((25 <= attribute) && (attribute <= 100));
 	}
 	
 	/* Weight */
@@ -192,32 +296,6 @@ public class Unit {
 	}
 	
 	/**
-	 * Check whether the given strength is a valid strength for
-	 * any Unit.
-	 *  
-	 * @param  strength
-	 *         The strength to check.
-	 * @return 
-	 *       | result == ((1 < strength) && (strength < 200))
-	*/
-	public static boolean isValidStrength(int strength) {
-		return ((0 < strength) && (strength <= 200));
-	}
-	
-	/**
-	 * Check whether the given strength is a valid strength for
-	 * the initialization of any Unit
-	 * 
-	 * @param 	strength
-	 * 			The strength to check
-	 * @return 
-	 * 			| result == ((25 <= strength) && (strength <= 100))
-	 */
-	public static boolean isValidStartStrength(int strength){
-		return ((25 <= strength) && (strength <= 100));
-	}
-	
-	/**
 	 * Set the strength of this Unit to the given strength.
 	 * 
 	 * @param  strength
@@ -225,12 +303,12 @@ public class Unit {
 	 * @post   If the given strength is a valid strength for any Unit,
 	 *         the strength of this new Unit is equal to the given
 	 *         strength.
-	 *       | if (isValidStrength(strength))
+	 *       | if (isValidUnitAttribute(strength))
 	 *       |   then new.getStrength() == strength
 	 */
 	@Raw
 	public void setStrength(int strength) {
-		if (isValidStrength(strength))
+		if (isValidUnitAttribute(strength))
 			this.strength = strength;
 	}
 	
@@ -252,32 +330,6 @@ public class Unit {
 	}
 	
 	/**
-	 * Check whether the given agility is a valid agility for
-	 * any Unit.
-	 *  
-	 * @param  agility
-	 *         The agility to check.
-	 * @return 
-	 *       | result == ((1 < agility) && (agility < 200))
-	*/
-	public static boolean isValidAgility(int agility) {
-		return ((0 < agility) && (agility <= 200));
-	}
-	
-	/**
-	 * Check whether the given agility is a valid agility for
-	 * the initialization of any Unit
-	 * 
-	 * @param 	strength
-	 * 			The strength to check
-	 * @return 
-	 * 			| result == ((25 <= strength) && (strength <= 100))
-	 */
-	public static boolean isValidStartAgility(int agility){
-		return ((25 <= agility) && (agility <= 100));
-	}
-	
-	/**
 	 * Set the agility of this Unit to the given agility.
 	 * 
 	 * @param  agility
@@ -285,12 +337,12 @@ public class Unit {
 	 * @post   If the given agility is a valid agility for any Unit,
 	 *         the agility of this new Unit is equal to the given
 	 *         agility.
-	 *       | if (isValidAgility(agility))
+	 *       | if (isValidUnitAttribute(agility))
 	 *       |   then new.getAgility() == agility
 	 */
 	@Raw
 	public void setAgility(int agility) {
-		if (isValidAgility(agility))
+		if (isValidUnitAttribute(agility))
 			this.agility = agility;
 	}
 	
@@ -312,32 +364,6 @@ public class Unit {
 	}
 	
 	/**
-	 * Check whether the given toughness is a valid toughness for
-	 * any Unit.
-	 *  
-	 * @param  toughness
-	 *         The toughness to check.
-	 * @return 
-	 *       | result == ((25 <= toughness) && (toughness <= 100))
-	*/
-	public static boolean isValidToughness(int toughness) {
-		return ((25 <= toughness) && (toughness <= 100));
-	}
-	
-	/**
-	 * Check whether the given toughness is a valid toughness for
-	 * the initialization of any Unit
-	 * 
-	 * @param 	toughness
-	 * 			The weight to check
-	 * @return 
-	 *		| result == ((25 <= weight) && (weight <= 100) 
-	 */
-	public boolean isValidStartToughness(int toughness){
-		return ((25 <= toughness) && (toughness <= 100));
-	}
-	
-	/**
 	 * Set the toughness of this Unit to the given toughness.
 	 * 
 	 * @param  toughness
@@ -345,12 +371,12 @@ public class Unit {
 	 * @post   If the given toughness is a valid toughness for any Unit,
 	 *         the toughness of this new Unit is equal to the given
 	 *         toughness.
-	 *       | if (isValidToughness(toughness))
+	 *       | if (isValidUnitAttribute(toughness))
 	 *       |   then new.getToughness() == toughness
 	 */
 	@Raw
 	public void setToughness(int toughness) {
-		if (isValidToughness(toughness))
+		if (isValidUnitAttribute(toughness))
 			this.toughness = toughness;
 	}
 	
@@ -433,7 +459,7 @@ public class Unit {
 		return this.getMaxHP();
 	}
 	
-	/**
+	/** 
 	 * Check whether the given stamina is a valid stamina for
 	 * this Unit.
 	 *  
@@ -471,16 +497,18 @@ public class Unit {
 	
 	/* END Stamina */
 	
-	/* Work */
+	/* END Attribute*/
 	
+	
+	/* Work */
 	/**
 	 * Start the work-condition
-	 * @throws WorkTimeException
+	 * @throws IllegalArgumentException
 	 *         The given workTime is not a valid workTime for any
 	 *         Unit.
 	 *       | ! isValidWorkTime(getWorkTime())
 	 */
-	public void work() throws WorkTimeException {
+	public void work() throws IllegalArgumentException {
 		this.setWorkTime((double) 500.0d/strength);
 	}
 
@@ -527,9 +555,9 @@ public class Unit {
 	 *       | ! isValidWorkTime(getWorkTime())
 	 */
 	@Raw
-	public void setWorkTime(double worktime) throws WorkTimeException {
+	public void setWorkTime(double worktime) throws IllegalArgumentException {
 		if (! isValidWorkTime(worktime)) 
-			throw new WorkTimeException(worktime);
+			throw new IllegalArgumentException("the worktime is invalid");
 		this.worktime = worktime;
 	}
 	
@@ -538,14 +566,12 @@ public class Unit {
 	 * 
 	 * @param 	time
 	 * 			The time to be subtracted from worktime
-	 * @throws 	TimeException
+	 * @throws 	IllegalArgumentException
 	 * 			The given time is not a valid time for any Unit.
-	 * @throws 	WorkTimeException 
-*	 * 			The new time is not a valid time for any Unit.
 	 */
-	public void advanceWorkTime(double time) throws TimeException, WorkTimeException{
+	public void advanceWorkTime(double time) throws IllegalArgumentException{
 		if (! isValidTime(time))
-				throw new TimeException(time);
+				throw new IllegalArgumentException("The given time is not a valid time");
 		double newWorkTime = this.getWorkTime() - time;
 		if (Util.fuzzyLessThanOrEqualTo(newWorkTime , 0))
 			this.setWorkTime(0);
@@ -560,9 +586,76 @@ public class Unit {
 	
 	/* END Work */
 	
-	/* AdvanceTime */
 	
+	/* Attack */
 	/**
+	 * This Unit attacks the Other Unit
+	 * 
+	 * @param   other
+	 * 			the Unit being attacked
+	 * @throws	IllegalAttackException
+	 * 			The Unit being attacked is not in a valid position
+	 * @throws	IllegalArgumentException
+	 */
+	public void attack(Unit other) throws IllegalArgumentException{
+		if (! this.canAttack(other))
+			throw new IllegalArgumentException();
+		this.setAttackCountDown(1d);
+		
+		
+	}
+
+	/**
+	 * Return the attackCountDown of this Unit.
+	 */
+	@Basic @Raw
+	public double getAttackCountDown() {
+		return this.attackCountDown;
+	}
+
+	/**
+	 * Check whether the given attackCountDown is a valid attackCountDown for
+	 * any Unit.
+	 *  
+	 * @param  attackCountDown
+	 *         The attackCountDown to check.
+	 * @return 
+	 *       | result == (0 <= attackCountDown <=1 )
+	*/
+	public static boolean isValidAttackCountDown(double attackCountDown) {
+		return ((Util.fuzzyGreaterThanOrEqualTo(attackCountDown, 0)) && 
+				(Util.fuzzyGreaterThanOrEqualTo(1, attackCountDown)));
+	}
+
+	/**
+	 * Set the attackCountDown of this Unit to the given attackCountDown.
+	 * 
+	 * @param  attackCountDown
+	 *         The new attackCountDown for this Unit.
+	 * @post   The attackCountDown of this new Unit is equal to
+	 *         the given attackCountDown.
+	 *       | new.getAttackCountDown() == attackCountDown
+	 * @throws IllegalArgumentException
+	 *         The given attackCountDown is not a valid attackCountDown for any
+	 *         Unit.
+	 *       | ! isValidAttackCountDown(getAttackCountDown())
+	 */
+	@Raw
+	public void setAttackCountDown(double attackCountDown) throws IllegalArgumentException {
+		if (! isValidAttackCountDown(attackCountDown))
+			throw new IllegalArgumentException("the given countdown is not valid");
+		this.attackCountDown = attackCountDown;
+	}
+
+	/**
+	 * Variable registering the attackCountDown of this Unit.
+	 */
+	private double attackCountDown = 0;
+	/* END Attack */
+	
+	
+	/* AdvanceTime */
+	/** TODO: fuzzyequals gebruiken misschien
 	 * Check whether the given time is valid for any Unit
 	 * 
 	 * @param 	time
