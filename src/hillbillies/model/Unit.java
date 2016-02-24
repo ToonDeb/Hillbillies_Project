@@ -1,5 +1,9 @@
 package hillbillies.model;
 
+import hillbillies.model.UnitStatus;
+
+import java.util.Random;
+
 import be.kuleuven.cs.som.annotate.*;
 import ogp.framework.util.Util;
 
@@ -37,12 +41,16 @@ import ogp.framework.util.Util;
  * @invar  The attackCountDown of each Unit must be a valid attackCountDown for any
  *         Unit.
  *       | isValidAttackCountDown(getAttackCountDown())
+ *       
+ * @invar  The status of each Unit must be a valid status for any
+ *         Unit.
+ *        | isValidStatus(getStatus())
  * 
  * @author Toon
  * @version 0.1
  */
 public class Unit {
-	
+
 	/**
 	 * Initialize this new Unit with given position, strength, agility, weight and toughness.
 	 * 
@@ -129,6 +137,7 @@ public class Unit {
 		this.setHP(this.getMaxHP());
 		this.setStamina(this.getMaxStamina());
 		this.setPosition(position);
+		this.setStatus(UnitStatus.RESTING);
 	}
 	
 	/* Position */
@@ -161,13 +170,11 @@ public class Unit {
 	 * 
 	 * @param  position
 	 *         The new position for this Unit.
-	 * @post   The position of this new Unit is equal to
-	 *         the given position.
+	 * @post   The position of this Unit is equal to the given position.
 	 *       | new.getPosition() == position
 	 * @throws IllegalArgumentException
-	 *         The given position is not a valid position for any
-	 *         Unit.
-	 *       | ! isValidPosition(getPosition())
+	 *         The given position is not a valid position for any Unit.
+	 *       | ! isValidPosition(this.getPosition())
 	 */
 	@Raw
 	public void setPosition(double[] position) throws IllegalArgumentException {
@@ -175,7 +182,23 @@ public class Unit {
 			throw new IllegalArgumentException("the given position is not a valid");
 		this.position = position;
 	}
-
+	
+	/**TODO: uitwerken, ! enkel de orientatie van deze unit aanpassen
+	 * Set the orientation of THIS Unit to face the other Unit
+	 * 
+	 * @param 	other
+	 * 			the other unit, to which we will face
+	 * @post	The orientation of this Unit is towards the other Unit
+	 * 			| new.getOrientation() == 
+	 * @throws  IllegalArgumentException
+	 * 			the given other unit is not in a valid position
+	 * 			| ! this.canAttack(other)
+	 */
+	public void face(Unit other) throws IllegalArgumentException{
+		if (! this.canAttack(other))
+			throw new IllegalArgumentException("the other unit is not on a valid position");
+	}
+	
 	/**
 	 * Variable registering the position of this Unit.
 	 */
@@ -510,6 +533,7 @@ public class Unit {
 	 */
 	public void work() throws IllegalArgumentException {
 		this.setWorkTime((double) 500.0d/strength);
+		this.status = UnitStatus.WORKING;
 	}
 
 	/**
@@ -518,14 +542,6 @@ public class Unit {
 	@Basic @Raw
 	public double getWorkTime() {
 		return this.worktime;
-	}
-	
-	/**
-	 * Return the work status of this Unit. (True if Unit is currently working)
-	 */
-	@Basic
-	public boolean getWork(){
-		return (!Util.fuzzyEquals(this.getWorkTime(), 0));
 	}
 	
 	/**
@@ -549,13 +565,13 @@ public class Unit {
 	 * @post   The workTime of this new Unit is equal to
 	 *         the given workTime.
 	 *       | new.getWorkTime() == worktime
-	 * @throws WorkTimeException
+	 * @throws IllegalArgumentException
 	 *         The given workTime is not a valid workTime for any
 	 *         Unit.
 	 *       | ! isValidWorkTime(getWorkTime())
 	 */
 	@Raw
-	public void setWorkTime(double worktime) throws IllegalArgumentException {
+	private void setWorkTime(double worktime) throws IllegalArgumentException {
 		if (! isValidWorkTime(worktime)) 
 			throw new IllegalArgumentException("the worktime is invalid");
 		this.worktime = worktime;
@@ -572,9 +588,12 @@ public class Unit {
 	public void advanceWorkTime(double time) throws IllegalArgumentException{
 		if (! isValidTime(time))
 				throw new IllegalArgumentException("The given time is not a valid time");
+		
 		double newWorkTime = this.getWorkTime() - time;
-		if (Util.fuzzyLessThanOrEqualTo(newWorkTime , 0))
+		if (Util.fuzzyLessThanOrEqualTo(newWorkTime , 0)){
 			this.setWorkTime(0);
+			this.setStatus(UnitStatus.IDLE);
+		}
 		else
 			this.setWorkTime(newWorkTime);
 	}
@@ -593,15 +612,16 @@ public class Unit {
 	 * 
 	 * @param   other
 	 * 			the Unit being attacked
-	 * @throws	IllegalAttackException
-	 * 			The Unit being attacked is not in a valid position
 	 * @throws	IllegalArgumentException
+	 * 			The Unit being attacked is not a valid Unit
 	 */
 	public void attack(Unit other) throws IllegalArgumentException{
 		if (! this.canAttack(other))
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("The other Unit cannot be attacked");
 		this.setAttackCountDown(1d);
-		
+		this.setStatus(UnitStatus.ATTACKING);
+		other.defend(this);
+		this.face(other);
 		
 	}
 
@@ -641,10 +661,31 @@ public class Unit {
 	 *       | ! isValidAttackCountDown(getAttackCountDown())
 	 */
 	@Raw
-	public void setAttackCountDown(double attackCountDown) throws IllegalArgumentException {
+	private void setAttackCountDown(double attackCountDown) throws IllegalArgumentException {
 		if (! isValidAttackCountDown(attackCountDown))
 			throw new IllegalArgumentException("the given countdown is not valid");
 		this.attackCountDown = attackCountDown;
+	}
+	
+	/**
+	 * Reduces the worktime with time
+	 * 
+	 * @param 	time
+	 * 			The time to be subtracted from attackcountdown
+	 * @throws 	IllegalArgumentException
+	 * 			The given time is not a valid time for any Unit.
+	 */
+	public void advanceAttackTime(double time) throws IllegalArgumentException{
+		if (! isValidTime(time))
+				throw new IllegalArgumentException("The given time is not a valid time");
+		
+		double newAttackTime = this.getAttackCountDown() - time;
+		if (Util.fuzzyLessThanOrEqualTo(newAttackTime , 0)){
+			this.setAttackCountDown(0);
+			this.setStatus(UnitStatus.IDLE);
+		}
+		else
+			this.setAttackCountDown(newAttackTime);
 	}
 
 	/**
@@ -652,6 +693,64 @@ public class Unit {
 	 */
 	private double attackCountDown = 0;
 	/* END Attack */
+
+	Random rnd = new Random();
+	/* Defend */
+	public void defend(Unit other){
+		if (rnd.nextDouble() >= 0.1) 	//nextDouble maakt random getal tussen 0 en 1
+			return;
+ 	}
+	
+	
+	/* END Defend */
+	
+	/* Status */
+	/**
+	 * Return the status of this Unit.
+	 */
+	@Basic @Raw
+	public UnitStatus getStatus() {
+		return this.status;
+	}
+
+	/**
+	 * Check whether the given status is a valid status for
+	 * any Unit.
+	 *  
+	 * @param  status
+	 *         The status to check.
+	 * @return 
+	 *       | result == (status != null)
+	*/
+	public static boolean isValidStatus(UnitStatus status) {
+		return (status != null);
+	}
+
+	/**
+	 * Set the status of this Unit to the given status.
+	 * 
+	 * @param  status
+	 *         The new status for this Unit.
+	 * @post   The status of this new Unit is equal to
+	 *         the given status.
+	 *       | new.getStatus() == status
+	 * @throws IllegalArgumentException
+	 *         The given status is not a valid status for any
+	 *         Unit.
+	 *       | ! isValidStatus(getStatus())
+	 */
+	@Raw
+	private void setStatus(UnitStatus status) throws IllegalArgumentException {
+		if (! isValidStatus(status))
+			throw new IllegalArgumentException();
+		this.status = status;
+	}
+
+	/**
+	 * Variable registering the status of this Unit.
+	 */
+	private UnitStatus status;
+	/* END Status */
 	
 	
 	/* AdvanceTime */
