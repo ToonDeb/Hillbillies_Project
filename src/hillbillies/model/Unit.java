@@ -7,7 +7,6 @@ import java.util.Random;
 import be.kuleuven.cs.som.annotate.*;
 import ogp.framework.util.Util;
 
-import be.kuleuven.cs.som.annotate.*;
 
 /**
 <<<<<<< HEAD
@@ -61,36 +60,7 @@ import be.kuleuven.cs.som.annotate.*;
  */
 public class Unit {
 
-<<<<<<< HEAD
-	private double[] position;
 
-	/**
-	 * 
-	 * Returns the position of the unit.
-	 * 
-	 */
-	@Basic
-	public double[] getPosition() {
-		return this.position;
-	}
-	
-	/**
-	 * 
-	 * @param position
-	 */
-	public void setPosition(double[] position) {
-		if (isValidPosition(position))
-			this.position = position;
-		else
-			throw InvalidPositionException(position);
-	}
-	public boolean isValidPosition(double[] position) {
-		return (position[1] >= 0 ) && (position[1] < 50)
-				&& (position[2] >= 0 ) && (position[2] < 50)
-				&& (position[3] >= 0 ) && (position[3] < 50);
-	}
-}
-=======
 	/**
 	 * Initialize this new Unit with given position, strength, agility, weight and toughness.
 	 * 
@@ -191,18 +161,31 @@ public class Unit {
 	public double[] getPosition() {
 		return this.position;
 	}
-	//TODO:isValidPosition
 	/**
 	 * Check whether the given position is a valid position for
 	 * any Unit.
 	 *  
 	 * @param  position
 	 *         The position to check.
-	 * @return 
-	 *       | result == 
-	*/
+	 * @return	False if the given position is not effective.
+	 *		|	if (position == null)
+	 *		|		then result == false
+	 *			Otherwise, false if the given position doesn't have exactly three coordinates 			 
+	 *      | 	else if (position.length != 3)
+	 *      |		then result == false
+	 *      	Otherwise, true if all three coordinates are within the boundaries of the map
+	 *		|	else if 
+	 *		|	(position[0] >= 0) && (position[0] < 50) &&
+	 *		|	(position[1] >= 0) && (position[1] < 50) &&
+	 *		|	(position[2] >= 0) && (position[2] < 50)
+	 *		|		then result == true
+	 */
 	public static boolean isValidPosition(double[] position) {
-		return false;
+		return position != null && 
+				position.length == 3 && 
+				(position[0] >= 0) && (position[0] < 50) &&
+				 (position[1] >= 0) && (position[1] < 50) &&
+				  (position[2] >= 0) && (position[2] < 50);
 	}
 
 	/**
