@@ -1,5 +1,9 @@
 package hillbillies.model;
 
+import hillbillies.model.UnitStatus;
+
+import java.util.Random;
+
 import be.kuleuven.cs.som.annotate.*;
 import ogp.framework.util.Util;
 
@@ -37,12 +41,20 @@ import ogp.framework.util.Util;
  * @invar  The attackCountDown of each Unit must be a valid attackCountDown for any
  *         Unit.
  *       | isValidAttackCountDown(getAttackCountDown())
+ *       
+ * @invar  The status of each Unit must be a valid status for any
+ *         Unit.
+ *        | isValidStatus(getStatus())
+ *        
+ * @invar  The restTime of each Unit must be a valid restTime for any
+ *         Unit.
+ *       | isValidRestTime(getRestTime())
  * 
  * @author Toon
  * @version 0.1
  */
 public class Unit {
-	
+
 	/**
 	 * Initialize this new Unit with given position, strength, agility, weight and toughness.
 	 * 
@@ -129,6 +141,7 @@ public class Unit {
 		this.setHP(this.getMaxHP());
 		this.setStamina(this.getMaxStamina());
 		this.setPosition(position);
+		this.setStatus(UnitStatus.RESTING);
 	}
 	
 	/* Position */
@@ -161,13 +174,11 @@ public class Unit {
 	 * 
 	 * @param  position
 	 *         The new position for this Unit.
-	 * @post   The position of this new Unit is equal to
-	 *         the given position.
+	 * @post   The position of this Unit is equal to the given position.
 	 *       | new.getPosition() == position
 	 * @throws IllegalArgumentException
-	 *         The given position is not a valid position for any
-	 *         Unit.
-	 *       | ! isValidPosition(getPosition())
+	 *         The given position is not a valid position for any Unit.
+	 *       | ! isValidPosition(this.getPosition())
 	 */
 	@Raw
 	public void setPosition(double[] position) throws IllegalArgumentException {
@@ -175,7 +186,35 @@ public class Unit {
 			throw new IllegalArgumentException("the given position is not a valid");
 		this.position = position;
 	}
-
+	
+	/**TODO: uitwerken, ! enkel de orientatie van deze unit aanpassen
+	 * Set the orientation of THIS Unit to face the other Unit
+	 * 
+	 * @param 	other
+	 * 			the other unit, to which we will face
+	 * @post	The orientation of this Unit is towards the other Unit
+	 * 			| new.getOrientation() == 
+	 * @throws  IllegalArgumentException
+	 * 			the given other unit is not in a valid position
+	 * 			| ! this.canAttack(other)
+	 */
+	public void face(Unit other) throws IllegalArgumentException{
+		if (! this.canAttack(other))
+			throw new IllegalArgumentException("the other unit is not on a valid position");
+	}
+	
+	/**TODO:implementatie
+	 * The Unit moves instantaniously to a random position bordering its current position
+	 * This new position is a valid position in the gameworld
+	 * 
+	 * @post	the Unit is in a valid position
+	 * 			| new.getPosition() == ...
+	 * 
+	 */
+	public void dodge() {
+		
+	}
+	
 	/**
 	 * Variable registering the position of this Unit.
 	 */
@@ -510,6 +549,7 @@ public class Unit {
 	 */
 	public void work() throws IllegalArgumentException {
 		this.setWorkTime((double) 500.0d/strength);
+		this.status = UnitStatus.WORKING;
 	}
 
 	/**
@@ -518,14 +558,6 @@ public class Unit {
 	@Basic @Raw
 	public double getWorkTime() {
 		return this.worktime;
-	}
-	
-	/**
-	 * Return the work status of this Unit. (True if Unit is currently working)
-	 */
-	@Basic
-	public boolean getWork(){
-		return (!Util.fuzzyEquals(this.getWorkTime(), 0));
 	}
 	
 	/**
@@ -549,13 +581,13 @@ public class Unit {
 	 * @post   The workTime of this new Unit is equal to
 	 *         the given workTime.
 	 *       | new.getWorkTime() == worktime
-	 * @throws WorkTimeException
+	 * @throws IllegalArgumentException
 	 *         The given workTime is not a valid workTime for any
 	 *         Unit.
 	 *       | ! isValidWorkTime(getWorkTime())
 	 */
 	@Raw
-	public void setWorkTime(double worktime) throws IllegalArgumentException {
+	private void setWorkTime(double worktime) throws IllegalArgumentException {
 		if (! isValidWorkTime(worktime)) 
 			throw new IllegalArgumentException("the worktime is invalid");
 		this.worktime = worktime;
@@ -572,9 +604,12 @@ public class Unit {
 	public void advanceWorkTime(double time) throws IllegalArgumentException{
 		if (! isValidTime(time))
 				throw new IllegalArgumentException("The given time is not a valid time");
+		
 		double newWorkTime = this.getWorkTime() - time;
-		if (Util.fuzzyLessThanOrEqualTo(newWorkTime , 0))
+		if (Util.fuzzyLessThanOrEqualTo(newWorkTime , 0)){
 			this.setWorkTime(0);
+			this.setStatus(UnitStatus.IDLE);
+		}
 		else
 			this.setWorkTime(newWorkTime);
 	}
@@ -593,15 +628,16 @@ public class Unit {
 	 * 
 	 * @param   other
 	 * 			the Unit being attacked
-	 * @throws	IllegalAttackException
-	 * 			The Unit being attacked is not in a valid position
 	 * @throws	IllegalArgumentException
+	 * 			The Unit being attacked is not a valid Unit
 	 */
 	public void attack(Unit other) throws IllegalArgumentException{
 		if (! this.canAttack(other))
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("The other Unit cannot be attacked");
 		this.setAttackCountDown(1d);
-		
+		this.setStatus(UnitStatus.ATTACKING);
+		other.defend(this);
+		this.face(other);
 		
 	}
 
@@ -632,7 +668,7 @@ public class Unit {
 	 * 
 	 * @param  attackCountDown
 	 *         The new attackCountDown for this Unit.
-	 * @post   The attackCountDown of this new Unit is equal to
+	 * @post   The attackCountDown of this Unit is equal to
 	 *         the given attackCountDown.
 	 *       | new.getAttackCountDown() == attackCountDown
 	 * @throws IllegalArgumentException
@@ -641,10 +677,34 @@ public class Unit {
 	 *       | ! isValidAttackCountDown(getAttackCountDown())
 	 */
 	@Raw
-	public void setAttackCountDown(double attackCountDown) throws IllegalArgumentException {
+	private void setAttackCountDown(double attackCountDown) throws IllegalArgumentException {
 		if (! isValidAttackCountDown(attackCountDown))
 			throw new IllegalArgumentException("the given countdown is not valid");
 		this.attackCountDown = attackCountDown;
+	}
+	
+	/**
+	 * Reduces the worktime with time
+	 * 
+	 * @param 	time
+	 * 			The time to be subtracted from attackcountdown
+	 * @post	The attackCountDown of this Unit is reduced by the amount time
+	 * 			| new.getAttackCountDown() == this.getAttackCountDown() - time
+	 * @throws 	IllegalArgumentException
+	 * 			The given time is not a valid time for any Unit.
+	 * 			| ! isValidTime(time)
+	 */
+	public void advanceAttackTime(double time) throws IllegalArgumentException{
+		if (! isValidTime(time))
+				throw new IllegalArgumentException("The given time is not a valid time");
+		
+		double newAttackTime = this.getAttackCountDown() - time;
+		if (Util.fuzzyLessThanOrEqualTo(newAttackTime , 0)){
+			this.setAttackCountDown(0);
+			this.setStatus(UnitStatus.IDLE);
+		}
+		else
+			this.setAttackCountDown(newAttackTime);
 	}
 
 	/**
@@ -652,6 +712,209 @@ public class Unit {
 	 */
 	private double attackCountDown = 0;
 	/* END Attack */
+
+	Random rnd = new Random();
+	/* Defend */
+	/** TODO:defend expand postcondition
+	 * This Unit is attacked by the other Unit, and can take damage because of this
+	 * 
+	 * @param 	other
+	 * 			The Unit attacking this Unit.
+	 * @post	If dodging and blocking failed, the hp of this unit is reduced by 
+	 * 			strength of the attacker divided by ten
+	 * 			| if (
+	 * @throws 	IllegalArgumentException
+	 * 			This Unit cannot be attacked by  the other Unit
+	 * 			| ! other.canAttack(this)
+	 */
+	public void defend(Unit other) throws IllegalArgumentException{
+		if (! other.canAttack(this))
+			throw new IllegalArgumentException("This Unit can not be attacked by the other unit");
+			
+		this.setStatus(UnitStatus.DEFENDING);
+		this.face(other);
+		
+		double dodgeChance = 0.2d* (this.getAgility()/other.getAgility());
+		double blockChance = (0.25d* 
+				(this.getStrength() + this.getAgility()))/(other.getStrength()+other.getAgility());
+		if (Util.fuzzyGreaterThanOrEqualTo(rnd.nextDouble(),dodgeChance)){ //nextDouble maakt random getal tussen 0 en 1
+			this.dodge();
+			//this.setStatus(UnitStatus.IDLE); //TODO:hier, of in advanceTime?
+			return;
+		}
+		if (Util.fuzzyGreaterThanOrEqualTo(rnd.nextDouble(),blockChance)){
+			//this.setStatus(UnitStatus.IDLE);
+			return;
+		}
+		int newHP = this.getHP() - other.getStrength()/10;
+		this.setHP(newHP);
+			
+ 	}
+	/* END Defend */
+	
+	
+	/* Rest */
+	// nominaal
+	/**
+	 * Initiate the rest status for this unit.
+	 * 
+	 * @pre	The Unit is not attacking
+	 * 		| this.status != UnitStatus.ATTACKING
+	 * @pre The Unit is not being attacked
+	 * 		| this.status != UnitStatus.DEFENDING
+	 * @post	The status of this Unit is 'resting'
+	 * 			| new.getStatus() == Unitstatus.RESTING
+	 * @post	The restTime of this Unit is 0
+	 * 			| new.getRestTime() == 0
+	 */
+	public void rest(){
+		assert (this.getStatus() != UnitStatus.ATTACKING);
+		assert (this.getStatus() != UnitStatus.DEFENDING);
+		this.setRestTime(0);
+		this.setStatus(UnitStatus.REST);
+	}
+	
+	/**
+	 * Update the hp and stamina of this resting Unit.
+	 * 
+	 * @param 	time
+	 * 			The amount of time passed
+	 * @pre 	time is a valid time for any unit
+	 * 			| isValidTime(time)
+	 * @pre		This Unit is in RESTING or REST status
+	 * 			| (this.getStatus() == UnitStatus.REST) || (this.getStatus() == UnitStatus.RESTING)
+	 * @post	TODO: postcondities
+	 */
+	public void advanceRest(double time){
+		assert isValidTime(time);
+		assert (this.getStatus() == UnitStatus.REST) || (this.getStatus() == UnitStatus.RESTING);
+		
+		this.setRestTime(this.getRestTime() + time);
+		double oneHPTime = this.getToughness()/(200d * 0.2d);
+		double newTime = this.getRestTime() - oneHPTime;
+		// check for rest-status
+		if (Util.fuzzyGreaterThanOrEqualTo(newTime, 0) && 
+				(this.getStatus() == UnitStatus.REST)){
+			this.setStatus(UnitStatus.RESTING);
+		}
+		// check for hp
+		if (this.getMaxHP() != this.getHP()){
+			if (Util.fuzzyGreaterThanOrEqualTo(newTime, 0)){
+				this.setRestTime(newTime);
+				this.setHP(this.getHP() + 1);
+			}
+			else
+				return;
+		}
+		// check for stamina
+		else if (this.getStamina() != this.getMaxStamina()){
+			double oneStaminaTime = this.getToughness()/(100d * 0.2d);
+			double newTimeT = this.getRestTime() - oneStaminaTime;
+			if (Util.fuzzyGreaterThanOrEqualTo(newTimeT, 0)){
+				this.setRestTime(newTimeT);
+				this.setStamina(this.getStamina() + 1);
+			}
+			else
+				return;
+		}
+		// resting has ended
+		else {
+			this.setStatus(UnitStatus.IDLE);
+		}
+	}
+
+	/**
+	 * Return the restTime of this Unit.
+	 */
+	@Basic @Raw
+	public double getRestTime() {
+		return this.restTime;
+	}
+
+	/**
+	 * Check whether the given restTime is a valid restTime for
+	 * any Unit.
+	 *  
+	 * @param  restTime
+	 *         The restTime to check.
+	 * @return 
+	 *       | result == (restTime >= 0))
+	*/
+	public static boolean isValidRestTime(double restTime) {
+		return (Util.fuzzyGreaterThanOrEqualTo(restTime, 0));
+	}
+
+	/**
+	 * Set the restTime of this Unit to the given restTime.
+	 * 
+	 * @param  restTime
+	 *         The new restTime for this Unit.
+	 * @pre    The given restTime must be a valid restTime for any
+	 *         Unit.
+	 *       | isValidRestTime(restTime)
+	 * @post   The restTime of this Unit is equal to the given
+	 *         restTime.
+	 *       | new.getRestTime() == restTime
+	 */
+	@Raw
+	public void setRestTime(double restTime) {
+		assert isValidRestTime(restTime);
+		this.restTime = restTime;
+	}
+
+	/**
+	 * Variable registering the restTime of this Unit.
+	 */
+	private double restTime = 0;
+	/* END Rest */
+	
+	/* Status */
+	/**
+	 * Return the status of this Unit.
+	 */
+	@Basic @Raw
+	public UnitStatus getStatus() {
+		return this.status;
+	}
+
+	/**
+	 * Check whether the given status is a valid status for
+	 * any Unit.
+	 *  
+	 * @param  status
+	 *         The status to check.
+	 * @return 
+	 *       | result == (status != null)
+	*/
+	public static boolean isValidStatus(UnitStatus status) {
+		return (status != null);
+	}
+
+	/**
+	 * Set the status of this Unit to the given status.
+	 * 
+	 * @param  status
+	 *         The new status for this Unit.
+	 * @post   The status of this new Unit is equal to
+	 *         the given status.
+	 *       | new.getStatus() == status
+	 * @throws IllegalArgumentException
+	 *         The given status is not a valid status for any
+	 *         Unit.
+	 *       | ! isValidStatus(getStatus())
+	 */
+	@Raw
+	private void setStatus(UnitStatus status) throws IllegalArgumentException {
+		if (! isValidStatus(status))
+			throw new IllegalArgumentException();
+		this.status = status;
+	}
+
+	/**
+	 * Variable registering the status of this Unit.
+	 */
+	private UnitStatus status;
+	/* END Status */
 	
 	
 	/* AdvanceTime */
@@ -669,6 +932,8 @@ public class Unit {
 		else
 			return false;
 	}
+	
+	//TODO:advanceTime every unit rests automaticaly every 3 minutes
 	
 	/* END AdvanceTime */
 }
