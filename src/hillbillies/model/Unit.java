@@ -45,6 +45,10 @@ import ogp.framework.util.Util;
  * @invar  The status of each Unit must be a valid status for any
  *         Unit.
  *        | isValidStatus(getStatus())
+ *        
+ * @invar  The restTime of each Unit must be a valid restTime for any
+ *         Unit.
+ *       | isValidRestTime(getRestTime())
  * 
  * @author Toon
  * @version 0.1
@@ -197,6 +201,18 @@ public class Unit {
 	public void face(Unit other) throws IllegalArgumentException{
 		if (! this.canAttack(other))
 			throw new IllegalArgumentException("the other unit is not on a valid position");
+	}
+	
+	/**TODO:implementatie
+	 * The Unit moves instantaniously to a random position bordering its current position
+	 * This new position is a valid position in the gameworld
+	 * 
+	 * @post	the Unit is in a valid position
+	 * 			| new.getPosition() == ...
+	 * 
+	 */
+	public void dodge() {
+		
 	}
 	
 	/**
@@ -652,7 +668,7 @@ public class Unit {
 	 * 
 	 * @param  attackCountDown
 	 *         The new attackCountDown for this Unit.
-	 * @post   The attackCountDown of this new Unit is equal to
+	 * @post   The attackCountDown of this Unit is equal to
 	 *         the given attackCountDown.
 	 *       | new.getAttackCountDown() == attackCountDown
 	 * @throws IllegalArgumentException
@@ -672,8 +688,11 @@ public class Unit {
 	 * 
 	 * @param 	time
 	 * 			The time to be subtracted from attackcountdown
+	 * @post	The attackCountDown of this Unit is reduced by the amount time
+	 * 			| new.getAttackCountDown() == this.getAttackCountDown() - time
 	 * @throws 	IllegalArgumentException
 	 * 			The given time is not a valid time for any Unit.
+	 * 			| ! isValidTime(time)
 	 */
 	public void advanceAttackTime(double time) throws IllegalArgumentException{
 		if (! isValidTime(time))
@@ -696,13 +715,158 @@ public class Unit {
 
 	Random rnd = new Random();
 	/* Defend */
-	public void defend(Unit other){
-		if (rnd.nextDouble() >= 0.1) 	//nextDouble maakt random getal tussen 0 en 1
+	/** TODO:defend expand postcondition
+	 * This Unit is attacked by the other Unit, and can take damage because of this
+	 * 
+	 * @param 	other
+	 * 			The Unit attacking this Unit.
+	 * @post	If dodging and blocking failed, the hp of this unit is reduced by 
+	 * 			strength of the attacker divided by ten
+	 * 			| if (
+	 * @throws 	IllegalArgumentException
+	 * 			This Unit cannot be attacked by  the other Unit
+	 * 			| ! other.canAttack(this)
+	 */
+	public void defend(Unit other) throws IllegalArgumentException{
+		if (! other.canAttack(this))
+			throw new IllegalArgumentException("This Unit can not be attacked by the other unit");
+			
+		this.setStatus(UnitStatus.DEFENDING);
+		this.face(other);
+		
+		double dodgeChance = 0.2d* (this.getAgility()/other.getAgility());
+		double blockChance = (0.25d* 
+				(this.getStrength() + this.getAgility()))/(other.getStrength()+other.getAgility());
+		if (Util.fuzzyGreaterThanOrEqualTo(rnd.nextDouble(),dodgeChance)){ //nextDouble maakt random getal tussen 0 en 1
+			this.dodge();
+			//this.setStatus(UnitStatus.IDLE); //TODO:hier, of in advanceTime?
 			return;
+		}
+		if (Util.fuzzyGreaterThanOrEqualTo(rnd.nextDouble(),blockChance)){
+			//this.setStatus(UnitStatus.IDLE);
+			return;
+		}
+		int newHP = this.getHP() - other.getStrength()/10;
+		this.setHP(newHP);
+			
  	}
-	
-	
 	/* END Defend */
+	
+	
+	/* Rest */
+	// nominaal
+	/**
+	 * Initiate the rest status for this unit.
+	 * 
+	 * @pre	The Unit is not attacking
+	 * 		| this.status != UnitStatus.ATTACKING
+	 * @pre The Unit is not being attacked
+	 * 		| this.status != UnitStatus.DEFENDING
+	 * @post	The status of this Unit is 'resting'
+	 * 			| new.getStatus() == Unitstatus.RESTING
+	 * @post	The restTime of this Unit is 0
+	 * 			| new.getRestTime() == 0
+	 */
+	public void rest(){
+		assert (this.getStatus() != UnitStatus.ATTACKING);
+		assert (this.getStatus() != UnitStatus.DEFENDING);
+		this.setRestTime(0);
+		this.setStatus(UnitStatus.REST);
+	}
+	
+	/**
+	 * Update the hp and stamina of this resting Unit.
+	 * 
+	 * @param 	time
+	 * 			The amount of time passed
+	 * @pre 	time is a valid time for any unit
+	 * 			| isValidTime(time)
+	 * @pre		This Unit is in RESTING or REST status
+	 * 			| (this.getStatus() == UnitStatus.REST) || (this.getStatus() == UnitStatus.RESTING)
+	 * @post	TODO: postcondities
+	 */
+	public void advanceRest(double time){
+		assert isValidTime(time);
+		assert (this.getStatus() == UnitStatus.REST) || (this.getStatus() == UnitStatus.RESTING);
+		
+		this.setRestTime(this.getRestTime() + time);
+		double oneHPTime = this.getToughness()/(200d * 0.2d);
+		double newTime = this.getRestTime() - oneHPTime;
+		// check for rest-status
+		if (Util.fuzzyGreaterThanOrEqualTo(newTime, 0) && 
+				(this.getStatus() == UnitStatus.REST)){
+			this.setStatus(UnitStatus.RESTING);
+		}
+		// check for hp
+		if (this.getMaxHP() != this.getHP()){
+			if (Util.fuzzyGreaterThanOrEqualTo(newTime, 0)){
+				this.setRestTime(newTime);
+				this.setHP(this.getHP() + 1);
+			}
+			else
+				return;
+		}
+		// check for stamina
+		else if (this.getStamina() != this.getMaxStamina()){
+			double oneStaminaTime = this.getToughness()/(100d * 0.2d);
+			double newTimeT = this.getRestTime() - oneStaminaTime;
+			if (Util.fuzzyGreaterThanOrEqualTo(newTimeT, 0)){
+				this.setRestTime(newTimeT);
+				this.setStamina(this.getStamina() + 1);
+			}
+			else
+				return;
+		}
+		// resting has ended
+		else {
+			this.setStatus(UnitStatus.IDLE);
+		}
+	}
+
+	/**
+	 * Return the restTime of this Unit.
+	 */
+	@Basic @Raw
+	public double getRestTime() {
+		return this.restTime;
+	}
+
+	/**
+	 * Check whether the given restTime is a valid restTime for
+	 * any Unit.
+	 *  
+	 * @param  restTime
+	 *         The restTime to check.
+	 * @return 
+	 *       | result == (restTime >= 0))
+	*/
+	public static boolean isValidRestTime(double restTime) {
+		return (Util.fuzzyGreaterThanOrEqualTo(restTime, 0));
+	}
+
+	/**
+	 * Set the restTime of this Unit to the given restTime.
+	 * 
+	 * @param  restTime
+	 *         The new restTime for this Unit.
+	 * @pre    The given restTime must be a valid restTime for any
+	 *         Unit.
+	 *       | isValidRestTime(restTime)
+	 * @post   The restTime of this Unit is equal to the given
+	 *         restTime.
+	 *       | new.getRestTime() == restTime
+	 */
+	@Raw
+	public void setRestTime(double restTime) {
+		assert isValidRestTime(restTime);
+		this.restTime = restTime;
+	}
+
+	/**
+	 * Variable registering the restTime of this Unit.
+	 */
+	private double restTime = 0;
+	/* END Rest */
 	
 	/* Status */
 	/**
@@ -768,6 +932,8 @@ public class Unit {
 		else
 			return false;
 	}
+	
+	//TODO:advanceTime every unit rests automaticaly every 3 minutes
 	
 	/* END AdvanceTime */
 }

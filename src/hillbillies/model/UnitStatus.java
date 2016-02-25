@@ -17,5 +17,7 @@ public enum UnitStatus {
 	
 	RESTING,
 	
+	REST,		// initiating the rest-status. when 1 HP is added, go to RESTING status 
+	
 	IDLE
 }
