@@ -128,26 +128,27 @@ public class Unit {
 		
 		if (! isValidStartAttribute(strength))
 			strength = 25;
-		setStrength(strength);
+		else
+			setStrength(strength);
 		if (! isValidStartAttribute(agility))
 			agility = 25;
-		setAgility(agility);
+		else
+			setAgility(agility);
 		if (! isValidStartWeight(weight))
 			weight = 25;
-		setAgility(weight);
+		else
+			setAgility(weight);
 		if (! isValidStartAttribute(toughness))
 			toughness = 25;
-		setToughness(toughness);
+		else
+			setToughness(toughness);
 		this.setHP(this.getMaxHP());
 		this.setStamina(this.getMaxStamina());
 		this.setPosition(position);
-		this.setStatus(UnitStatus.RESTING);
+		this.setStatus(UnitStatus.IDLE);
 	}
 	
 	/* Position */
-
-
-
 	/**
 	 * Return the position of this Unit.
 	 */
@@ -735,13 +736,14 @@ public class Unit {
 		this.face(other);
 		
 		double dodgeChance = 0.2d* (this.getAgility()/other.getAgility());
-		double blockChance = (0.25d* 
-				(this.getStrength() + this.getAgility()))/(other.getStrength()+other.getAgility());
+		
 		if (Util.fuzzyGreaterThanOrEqualTo(rnd.nextDouble(),dodgeChance)){ //nextDouble maakt random getal tussen 0 en 1
 			this.dodge();
 			//this.setStatus(UnitStatus.IDLE); //TODO:hier, of in advanceTime?
 			return;
 		}
+		double blockChance = (0.25d* (this.getStrength() + this.getAgility()))
+				/(other.getStrength()+other.getAgility());
 		if (Util.fuzzyGreaterThanOrEqualTo(rnd.nextDouble(),blockChance)){
 			//this.setStatus(UnitStatus.IDLE);
 			return;
