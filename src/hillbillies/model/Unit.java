@@ -206,6 +206,17 @@ public class Unit {
 		this.position = position;
 	}
 	
+	/**
+	 * Return the position of the cube occupied by this Unit.
+	 */
+	public int[] getCubePosition() {
+		int cubeX = (int) Math.floor(position[0]);
+		int cubeY = (int) Math.floor(position[1]);
+		int cubeZ = (int) Math.floor(position[2]);
+		int []cubePosition = {cubeX, cubeY, cubeZ};
+		return cubePosition;
+	}
+	
 	/**TODO: uitwerken, ! enkel de orientatie van deze unit aanpassen
 	 * Set the orientation of THIS Unit to face the other Unit
 	 * 
