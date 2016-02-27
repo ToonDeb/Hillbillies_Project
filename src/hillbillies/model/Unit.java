@@ -202,7 +202,7 @@ public class Unit {
 	@Raw
 	public void setPosition(double[] position) throws IllegalArgumentException {
 		if (! isValidPosition(position))
-			throw new IllegalArgumentException("the given position is not a valid");
+			throw new IllegalArgumentException("the given position is not a valid position");
 		this.position = position;
 	}
 	
