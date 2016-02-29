@@ -131,12 +131,11 @@ public class Unit {
 	 * @effect The name of this new unit is set to
 	 *         the given name.
 	 *       | this.setName(name)
-	 * @throws 	IllegalNameException(name, this)
-	 * 			This new unit cannot have the given name as its name
+	 * @throws 	IllegalArgumentException
 	 * xxxxxxxxxxONNODIGxxxxxxxxx    
 	 */
 	public Unit(double[] position, int weight, int strength, int agility, int toughness) 
-			throws IllegalArgumentException, IllegalNameException {
+			throws IllegalArgumentException {
 		
 		if (! isValidStartAttribute(strength))
 			strength = 25;
@@ -250,16 +249,16 @@ public class Unit {
 	 * @post   The name of this new unit is equal to
 	 *         the given name.
 	 *       | new.getName() == name
-	 * @throws ExceptionName_Java
+	 * @throws IllegalArgumentException
 	 *         The given name is not a valid name for any
 	 *         unit.
 	 *       | ! isValidName(getName())
 	 */
 	@Raw
 	public void setName(String name) 
-			throws IllegalNameException {
+			throws IllegalArgumentException {
 		if (! isValidName(name))
-			throw new IllegalNameException();
+			throw new IllegalArgumentException();
 		this.name = name;
 	}
 	
