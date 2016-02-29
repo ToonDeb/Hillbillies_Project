@@ -7,7 +7,11 @@ import java.util.Random;
 import be.kuleuven.cs.som.annotate.*;
 import ogp.framework.util.Util;
 
+
 /**
+<<<<<<< HEAD
+ * @authors Toon, Nathan
+=======
  * A class for Units
  * 
  * @invar  The position of each Unit must be a valid position for any
@@ -56,9 +60,11 @@ import ogp.framework.util.Util;
 
  * 
  * @author Toon
+>>>>>>> refs/remotes/origin/master
  * @version 0.1
  */
 public class Unit {
+
 
 	/**
 	 * Initialize this new Unit with given position, strength, agility, weight and toughness.
@@ -139,27 +145,32 @@ public class Unit {
 		
 		if (! isValidStartAttribute(strength))
 			strength = 25;
-		setStrength(strength);
+		else
+			setStrength(strength);
 		if (! isValidStartAttribute(agility))
 			agility = 25;
-		setAgility(agility);
+		else
+			setAgility(agility);
 		if (! isValidStartWeight(weight))
 			weight = 25;
-		setAgility(weight);
+		else
+			setAgility(weight);
 		if (! isValidStartAttribute(toughness))
 			toughness = 25;
-		setToughness(toughness);
+		else
+			setToughness(toughness);
 		this.setHP(this.getMaxHP());
 		this.setStamina(this.getMaxStamina());
 		this.setPosition(position);
+<<<<<<< HEAD
 		this.setStatus(UnitStatus.RESTING);
 		this.setName(name);
+=======
+		this.setStatus(UnitStatus.IDLE);
+>>>>>>> refs/remotes/origin/master
 	}
 	
 	/* Position */
-
-
-
 	/**
 	 * Return the position of this Unit.
 	 */
@@ -167,18 +178,31 @@ public class Unit {
 	public double[] getPosition() {
 		return this.position;
 	}
-	//TODO:isValidPosition
 	/**
 	 * Check whether the given position is a valid position for
 	 * any Unit.
 	 *  
 	 * @param  position
 	 *         The position to check.
-	 * @return 
-	 *       | result == 
-	*/
+	 * @return	False if the given position is not effective.
+	 *		|	if (position == null)
+	 *		|		then result == false
+	 *			Otherwise, false if the given position doesn't have exactly three coordinates 			 
+	 *      | 	else if (position.length != 3)
+	 *      |		then result == false
+	 *      	Otherwise, true if all three coordinates are within the boundaries of the map
+	 *		|	else if 
+	 *		|	(position[0] >= 0) && (position[0] < 50) &&
+	 *		|	(position[1] >= 0) && (position[1] < 50) &&
+	 *		|	(position[2] >= 0) && (position[2] < 50)
+	 *		|		then result == true
+	 */
 	public static boolean isValidPosition(double[] position) {
-		return false;
+		return position != null && 
+				position.length == 3 && 
+				(position[0] >= 0) && (position[0] < 50) &&
+				 (position[1] >= 0) && (position[1] < 50) &&
+				  (position[2] >= 0) && (position[2] < 50);
 	}
 
 	/**
@@ -195,10 +219,11 @@ public class Unit {
 	@Raw
 	public void setPosition(double[] position) throws IllegalArgumentException {
 		if (! isValidPosition(position))
-			throw new IllegalArgumentException("the given position is not a valid");
+			throw new IllegalArgumentException("the given position is not a valid position");
 		this.position = position;
 	}
 	
+<<<<<<< HEAD
 
 	/**
 	 * Return the name of this unit.
@@ -267,6 +292,19 @@ public class Unit {
 	 */
 	private String name;
 	
+=======
+	/**
+	 * Return the position of the cube occupied by this Unit.
+	 */
+	public int[] getCubePosition() {
+		int cubeX = (int) Math.floor(position[0]);
+		int cubeY = (int) Math.floor(position[1]);
+		int cubeZ = (int) Math.floor(position[2]);
+		int []cubePosition = {cubeX, cubeY, cubeZ};
+		return cubePosition;
+	}
+	
+>>>>>>> refs/remotes/origin/master
 	/**TODO: uitwerken, ! enkel de orientatie van deze unit aanpassen
 	 * Set the orientation of THIS Unit to face the other Unit
 	 * 
@@ -815,13 +853,14 @@ public class Unit {
 		this.face(other);
 		
 		double dodgeChance = 0.2d* (this.getAgility()/other.getAgility());
-		double blockChance = (0.25d* 
-				(this.getStrength() + this.getAgility()))/(other.getStrength()+other.getAgility());
+		
 		if (Util.fuzzyGreaterThanOrEqualTo(rnd.nextDouble(),dodgeChance)){ //nextDouble maakt random getal tussen 0 en 1
 			this.dodge();
 			//this.setStatus(UnitStatus.IDLE); //TODO:hier, of in advanceTime?
 			return;
 		}
+		double blockChance = (0.25d* (this.getStrength() + this.getAgility()))
+				/(other.getStrength()+other.getAgility());
 		if (Util.fuzzyGreaterThanOrEqualTo(rnd.nextDouble(),blockChance)){
 			//this.setStatus(UnitStatus.IDLE);
 			return;
@@ -1017,3 +1056,4 @@ public class Unit {
 	
 	/* END AdvanceTime */
 }
+>>>>>>> refs/remotes/origin/master
