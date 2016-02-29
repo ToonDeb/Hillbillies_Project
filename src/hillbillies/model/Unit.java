@@ -53,6 +53,11 @@ import ogp.framework.util.Util;
  * @invar  The restTime of each Unit must be a valid restTime for any
  *         Unit.
  *       | isValidRestTime(getRestTime())
+ * @invar  The name of each unit must be a valid name for any
+ *         unit.
+ *       | isValidName(getName())
+ *
+
  * 
  * @author Toon
 >>>>>>> refs/remotes/origin/master
@@ -127,6 +132,12 @@ public class Unit {
 	 * @post   The hitpoints of this new Unit is equal to the given
 	 *         hitpoints.
 	 *       | new.getHP() == 200*(weight/100)*(toughness/100)
+	 * @param  name
+	 *         The name for this new unit.
+	 * @effect The name of this new unit is set to
+	 *         the given name.
+	 *       | this.setName(name)
+	 * @throws 	IllegalArgumentException
 	 * xxxxxxxxxxONNODIGxxxxxxxxx    
 	 */
 	public Unit(double[] position, int weight, int strength, int agility, int toughness) 
@@ -151,7 +162,12 @@ public class Unit {
 		this.setHP(this.getMaxHP());
 		this.setStamina(this.getMaxStamina());
 		this.setPosition(position);
+<<<<<<< HEAD
+		this.setStatus(UnitStatus.RESTING);
+		this.setName(name);
+=======
 		this.setStatus(UnitStatus.IDLE);
+>>>>>>> refs/remotes/origin/master
 	}
 	
 	/* Position */
@@ -207,6 +223,76 @@ public class Unit {
 		this.position = position;
 	}
 	
+<<<<<<< HEAD
+
+	/**
+	 * Return the name of this unit.
+	 */
+	@Basic @Raw
+	public String getName() {
+		return this.name;
+	}
+	
+	/**
+	 * Check whether the given name is a valid name for
+	 * any unit.
+	 *  
+	 * @param  name
+	 *         The name to check.
+	 * @return False if the given name is not effective.
+	 *       | if (name == null)
+	 *       |	then result == false
+	 *       Otherwise, false if the name is shorter than two characters
+	 *       | else if (name.length < 2)
+	 *       |	then result == false
+	 *       Otherwise, false if the name doesn't begin with an uppercase letter
+	 *       | else if (!name.substring(0,1).matches("A-Z"))
+	 *       |	then result == false
+	 *       Otherwise, true if the name after the first character only consists of letters 
+	 *       (upper case and lower case), quotes (singles and doubles) and spaces
+	 *       | else if (name[1:].matches("[A-Za-z\'\" ]+"))
+	 *       |	then result == true
+	 *       
+	*/
+	public static boolean isValidName(String name) {
+		if (name == null)
+			return false;
+		if (name.length() < 2)
+			return false;		
+		if (!name.substring(0,1).matches("A-Z"))
+			return false;
+		return name.substring(1).matches("[A-Za-z\'\" ]+");
+		
+			
+	}
+	
+	/**
+	 * Set the name of this unit to the given name.
+	 * 
+	 * @param  name
+	 *         The new name for this unit.
+	 * @post   The name of this new unit is equal to
+	 *         the given name.
+	 *       | new.getName() == name
+	 * @throws IllegalArgumentException
+	 *         The given name is not a valid name for any
+	 *         unit.
+	 *       | ! isValidName(getName())
+	 */
+	@Raw
+	public void setName(String name) 
+			throws IllegalArgumentException {
+		if (! isValidName(name))
+			throw new IllegalArgumentException();
+		this.name = name;
+	}
+	
+	/**
+	 * Variable registering the name of this unit.
+	 */
+	private String name;
+	
+=======
 	/**
 	 * Return the position of the cube occupied by this Unit.
 	 */
@@ -218,6 +304,7 @@ public class Unit {
 		return cubePosition;
 	}
 	
+>>>>>>> refs/remotes/origin/master
 	/**TODO: uitwerken, ! enkel de orientatie van deze unit aanpassen
 	 * Set the orientation of THIS Unit to face the other Unit
 	 * 
