@@ -20,6 +20,7 @@ public class Facade implements IFacade {
 	public Unit createUnit(String name, int[] initialPosition, int weight, int agility, int strength, int toughness,
 			boolean enableDefaultBehavior) throws ModelException {
 		
+		// change initialPosition from int to double
 		double[] initialPositionDouble = new double[initialPosition.length];
 		for(int i=0; i<initialPosition.length; i++) {
 			initialPositionDouble[i] = initialPosition[i];
@@ -261,7 +262,6 @@ public class Facade implements IFacade {
 	@Override
 	public void fight(Unit attacker, Unit defender) throws ModelException {
 		attacker.attack(defender);
-		defender.defend(attacker);
 	}
 
 	/* (non-Javadoc)
