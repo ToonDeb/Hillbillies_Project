@@ -6,7 +6,7 @@ import java.util.Random;
 
 import be.kuleuven.cs.som.annotate.*;
 import ogp.framework.util.Util;
-
+/**TODO declare variables for boundary and other constant values
 
 /**
  * @authors Toon, Nathan
@@ -59,8 +59,10 @@ import ogp.framework.util.Util;
  * @invar  The defaultBoolean of each Unit must be a valid defaultBoolean for any
  *         Unit.
  *       | isValidDefaultBoolean(getDefaultBoolean())
+ * @invar  The orientation of each unit must be a valid orientation for any
+ *         unit.
+ *       | isValidOrientation(getOrientation())
  *
- * @author Toon
  * @version 0.1
  */
 public class Unit {
@@ -177,6 +179,18 @@ public class Unit {
 	public double[] getPosition() {
 		return this.position;
 	}
+	
+	/**
+	 * Return the position of the cube occupied by this Unit.
+	 */
+	public int[] getCubePosition() {
+		int cubeX = (int) Math.floor(position[0]);
+		int cubeY = (int) Math.floor(position[1]);
+		int cubeZ = (int) Math.floor(position[2]);
+		int []cubePosition = {cubeX, cubeY, cubeZ};
+		return cubePosition;
+	}
+	
 	/**
 	 * Check whether the given position is a valid position for
 	 * any Unit.
@@ -221,10 +235,17 @@ public class Unit {
 			throw new IllegalArgumentException("the given position is not a valid position");
 		this.position = position;
 	}
-
+	
+	/**
+	 * Variable registering the position of this Unit.
+	 */
+	private double[] position;
 	/**
 	 * Return the name of this unit.
 	 */
+	/* END Position */
+	
+	/* Name*/
 	@Basic @Raw
 	public String getName() {
 		return this.name;
@@ -289,16 +310,77 @@ public class Unit {
 	 */
 	private String name;
 
-	/**
-	 * Return the position of the cube occupied by this Unit.
-	 */
-	public int[] getCubePosition() {
-		int cubeX = (int) Math.floor(position[0]);
-		int cubeY = (int) Math.floor(position[1]);
-		int cubeZ = (int) Math.floor(position[2]);
-		int []cubePosition = {cubeX, cubeY, cubeZ};
-		return cubePosition;
-	}
+	/* END Name*/
+	
+	/*Orientation*/
+
+
+
+/**
+ * Initialize this new unit with given orientation.
+ * 
+ * @param  orientation
+ *         The orientation for this new unit.
+ * @post   If the given orientation is a valid orientation for any unit,
+ *         the orientation of this new unit is equal to the given
+ *         orientation. Otherwise, the orientation of this new unit is equal
+ *         to PI/2.
+ *       | if (isValidOrientation(orientation))
+ *       |   then new.getOrientation() == orientation
+ *       |   else new.getOrientation() == PI/2
+ */
+public Unit(float orientation) {
+	if (! isValidOrientation(orientation))
+		orientation = PI/2;
+	setOrientation(orientation);
+}
+
+/**
+ * Return the orientation of this unit.
+ */
+@Basic @Raw
+public float getOrientation() {
+	return this.orientation;
+}
+
+/**
+ * Check whether the given orientation is a valid orientation for
+ * any unit.
+ *  
+ * @param  orientation
+ *         The orientation to check.
+ * @return 
+ *		   The orientation of the unit is between 0 and 2*Math.PI 		 	
+ *       | orientation >= 0 && orientation < 2*Math.PI
+ *       
+*/
+public static boolean isValidOrientation(float orientation) {
+	return orientation >= 0 && orientation < 2*Math.PI;
+}
+
+/**
+ * Set the orientation of this unit to the given orientation.
+ * 
+ * @param  orientation
+ *         The new orientation for this unit.
+ * @post   The orientation is set to the physically corresponding orientation between 0 and 2*Math.PI
+ *       | new.getOrientation() == correspondingOrientation
+ */
+@Raw
+public void setOrientation(float orientation) {
+	if (orientation >= 0)
+		this.orientation = (float) (orientation % 2*Math.PI);
+	else 
+		this.orientation = (float) (2*Math.PI - ( -orientation % 2*Math.PI));
+}
+
+/**
+ * Variable registering the orientation of this unit.
+ */
+private float orientation;
+
+	
+
 
 	/**TODO: uitwerken, ! enkel de orientatie van deze unit aanpassen
 	 * Set the orientation of THIS Unit to face the other Unit
@@ -328,10 +410,7 @@ public class Unit {
 
 	}
 
-	/**
-	 * Variable registering the position of this Unit.
-	 */
-	private double[] position;
+
 
 	/** TODO:canAttack
 	 * Check whether this Unit can attack the other Unit
@@ -355,7 +434,7 @@ public class Unit {
 		
 	}
 	
-	/* END Position */
+	
 	
 	/* Attributes */
 	/**
