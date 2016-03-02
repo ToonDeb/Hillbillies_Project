@@ -382,13 +382,13 @@ private float orientation;
 	
 
 
-	/**TODO: uitwerken, ! enkel de orientatie van deze unit aanpassen
+	/**
 	 * Set the orientation of THIS Unit to face the other Unit
 	 *
 	 * @param 	other
 	 * 			the other unit, to which we will face
-	 * @post	The orientation of this Unit is towards the other Unit
-	 * 			| new.getOrientation() ==
+	 * @post	The orientation of this Unit is towards the other Unit.
+	 * 			| new.getOrientation() == Math.atan2(y_other - y_this, x_other - x_this)
 	 * @throws  IllegalArgumentException
 	 * 			the given other unit is not in a valid position
 	 * 			| ! this.canAttack(other)
@@ -396,7 +396,18 @@ private float orientation;
 	public void face(Unit other) throws IllegalArgumentException{
 		if (! this.canAttack(other))
 			throw new IllegalArgumentException("the other unit is not on a valid position");
+		double x_this = this.getPosition()[0];
+		double y_this = this.getPosition()[1];
+		double x_other = other.getPosition()[0];
+		double y_other = other.getPosition()[1];
+		
+		float this_orientation = (float) Math.atan2(y_other - y_this, x_other - x_this);
+				
+		this.setOrientation(this_orientation);
+
 	}
+	
+	/* END orientation */
 
 	/**TODO:implementatie
 	 * The Unit moves instantaniously to a random position bordering its current position
