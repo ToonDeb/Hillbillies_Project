@@ -9,9 +9,7 @@ import ogp.framework.util.Util;
 
 
 /**
-<<<<<<< HEAD
  * @authors Toon, Nathan
-=======
  * A class for Units
  * 
  * @invar  The position of each Unit must be a valid position for any
@@ -60,7 +58,6 @@ import ogp.framework.util.Util;
 
  * 
  * @author Toon
->>>>>>> refs/remotes/origin/master
  * @version 0.1
  */
 public class Unit {
@@ -132,6 +129,7 @@ public class Unit {
 	 * @post   The hitpoints of this new Unit is equal to the given
 	 *         hitpoints.
 	 *       | new.getHP() == 200*(weight/100)*(toughness/100)
+	 *       
 	 * @param  name
 	 *         The name for this new unit.
 	 * @effect The name of this new unit is set to
@@ -140,7 +138,7 @@ public class Unit {
 	 * @throws 	IllegalArgumentException
 	 * xxxxxxxxxxONNODIGxxxxxxxxx    
 	 */
-	public Unit(double[] position, int weight, int strength, int agility, int toughness) 
+	public Unit(String name, double[] position, int weight, int strength, int agility, int toughness) 
 			throws IllegalArgumentException {
 		
 		if (! isValidStartAttribute(strength))
@@ -162,12 +160,10 @@ public class Unit {
 		this.setHP(this.getMaxHP());
 		this.setStamina(this.getMaxStamina());
 		this.setPosition(position);
-<<<<<<< HEAD
-		this.setStatus(UnitStatus.RESTING);
+
 		this.setName(name);
-=======
+
 		this.setStatus(UnitStatus.IDLE);
->>>>>>> refs/remotes/origin/master
 	}
 	
 	/* Position */
@@ -222,8 +218,6 @@ public class Unit {
 			throw new IllegalArgumentException("the given position is not a valid position");
 		this.position = position;
 	}
-	
-<<<<<<< HEAD
 
 	/**
 	 * Return the name of this unit.
@@ -292,7 +286,6 @@ public class Unit {
 	 */
 	private String name;
 	
-=======
 	/**
 	 * Return the position of the cube occupied by this Unit.
 	 */
@@ -304,7 +297,6 @@ public class Unit {
 		return cubePosition;
 	}
 	
->>>>>>> refs/remotes/origin/master
 	/**TODO: uitwerken, ! enkel de orientatie van deze unit aanpassen
 	 * Set the orientation of THIS Unit to face the other Unit
 	 * 
@@ -1055,5 +1047,35 @@ public class Unit {
 	//TODO:advanceTime every unit rests automaticaly every 3 minutes
 	
 	/* END AdvanceTime */
+	
+	
+	/* Terminate */
+	/**
+	 * Terminate this Unit.
+	 *
+	 * @post   This Unit  is terminated.
+	 *       | new.isTerminated()
+	 * @post   ...
+	 *       | ...
+	 */
+	 public void terminate() {
+		 this.isTerminated = true;
+	 }
+	 
+	 /**
+	  * Return a boolean indicating whether or not this Unit
+	  * is terminated.
+	  */
+	 @Basic @Raw
+	 public boolean isTerminated() {
+		 return this.isTerminated;
+	 }
+	 
+	 /**
+	  * Variable registering whether this person is terminated.
+	  */
+	 private boolean isTerminated = false;
+	 
+	 /* END Terminate */
+	 
 }
->>>>>>> refs/remotes/origin/master
