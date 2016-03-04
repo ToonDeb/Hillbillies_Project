@@ -62,6 +62,9 @@ import ogp.framework.util.Util;
  * @invar  The orientation of each unit must be a valid orientation for any
  *         unit.
  *       | isValidOrientation(getOrientation())
+ * @invar  The destination of each unit must be a valid destination for any
+ *         unit.
+ *       | isValidDestination(getDestination())
  *
  * @version 0.1
  */
@@ -141,9 +144,15 @@ public class Unit {
 	 *         the given name.
 	 *       | this.setName(name)
 	 * @throws 	IllegalArgumentException
+	 * 	
+	 * @param  destination
+	 *         The destination for this new unit.
+	 * @effect The destination of this new unit is set to
+	 *         the given destination.
+	 *       | this.setDestination(destination)
 	 * xxxxxxxxxxONNODIGxxxxxxxxx
 	 */
-	public Unit(String name, double[] position, int weight, int strength, int agility, int toughness)
+	public Unit(String name, double[] position, int weight, int strength, int agility, int toughness, double[] destination)
 			throws IllegalArgumentException {
 
 		if (! isValidStartAttribute(strength))
@@ -169,6 +178,7 @@ public class Unit {
 		this.setName(name);
 
 		this.setStatus(UnitStatus.IDLE);
+		this.setDestination(destination);
 	}
 
 	/* Position */
@@ -179,7 +189,7 @@ public class Unit {
 	public double[] getPosition() {
 		return this.position;
 	}
-	
+
 	/**
 	 * Return the position of the cube occupied by this Unit.
 	 */
@@ -363,8 +373,18 @@ public static boolean isValidOrientation(float orientation) {
  * 
  * @param  orientation
  *         The new orientation for this unit.
- * @post   The orientation is set to the physically corresponding orientation between 0 and 2*Math.PI
- *       | new.getOrientation() == correspondingOrientation
+ * @post   The orientation is set to the physically corresponding orientation between 0 and 2*Math.PI.
+ * 		   For positive orientation, this is the remainder of a division by 2*Math.PI.
+ * 		   For negative orientation, this is 2*Math.PI minus the remainder of a division by
+ * 			2*Math.PI of the absolute value of the given orientation.
+ *       | if (orientation >= 0)
+ *       | 		let
+ *       | 			correspondingOrientation = (orientation % 2*Math.PI)
+ *       | else
+ *       | 		let
+ *       | 			correspondingOrientation = (2*Math.PI - ( -orientation % 2*Math.PI))
+ *       | in
+ *       |		new.getOrientation() == correspondingOrientation
  */
 @Raw
 public void setOrientation(float orientation) {
@@ -428,11 +448,23 @@ private float orientation;
 	 *
 	 * @param 	other
 	 * 			the unit being attacked
-	 * @return
-	 * 			|
+	 * @return  True if and only if the other unit occupies a cube that, in regards to the cube this unit occupies
+	 * 			has the  same z-coordinate, 
+	 * 			an x-coordinate differing no more than 1 and 
+	 * 			a y-coordinate differing no more than 1.
+	 * 		  | return (this.getCubePosition[2] == other.getCubePosition[2]) &&
+	 * 		  |  (abs(this.getCubePosition[0] - other.getCubePosition[0]) < 2) &&
+	 * 		  |  (abs(this.getCubePosition[1] - other.getCubePosition[1]) < 2)
+	 * @throws	IllegalArgumentException
+	 * 			The other unit is not effective
+	 * 		  | other == null
 	 */
-	public boolean canAttack(Unit other){
-		return true;
+	public boolean canAttack(Unit other) throws IllegalArgumentException{ 
+		if (other == null)
+			throw new IllegalArgumentException("Non effective unit");
+		return (this.getCubePosition()[2] == other.getCubePosition()[2]) &&
+				(Math.abs(this.getCubePosition()[0] - other.getCubePosition()[0]) < 2) &&
+				(Math.abs(this.getCubePosition()[1] - other.getCubePosition()[1]) < 2);
 	}
 	
 	/**TODO: movetorandom expand documentation
@@ -473,6 +505,89 @@ private float orientation;
 	public boolean isValidStartAttribute(int attribute){
 		return ((25 <= attribute) && (attribute <= 100));
 	}
+	
+	/* Speed */
+	/**
+	 * Return the base speed of this unit.
+	 */
+	public float getBaseSpeed() {
+		return (float) (1.5*(this.getStrength()+  this.getAgility())/
+				(200*weight/100));
+	}
+	/**
+	 * Return the speed of this unit.
+	 */
+	public float getSpeed() throws IllegalStateException{
+		
+		float vbase = this.getBaseSpeed();
+		
+		if (!(this.getStatus() == UnitStatus.WALKING))
+			throw new IllegalStateException("Unit not walking");
+		
+		else if (Util.fuzzyEquals(this.getPosition()[2] - this.getDestination()[2], -1))
+				return (float) (0.5*vbase);
+		else if (Util.fuzzyEquals(this.getPosition()[2] - this.getDestination()[2], 1))
+				return (float) (1.2*vbase);
+		else
+			return vbase;
+	}
+	/*END speed*/
+	/* destination */
+	
+	/**
+	 * Return the destination of this unit.
+	 */
+	@Basic @Raw
+	public double[] getDestination() {
+		return this.destination;
+	}
+	
+	/**
+	 * Check whether the given destination is a valid destination for
+	 * this unit.
+	 *  
+	 * @param  destination
+	 *         The destination to check.
+	 * @return If the unit is walking, true if the destination is a valid position.
+	 *       | if (this.getStatus == WALKING)
+	 *       | 		then return isValidPosition(destination)
+	 *         If the unit is not walking, true if the destination is null
+	 *       | else
+	 *       | 		return (destination == null)
+	*/
+	public boolean isValidDestination(double[] destination) {
+		if (this.getStatus() == UnitStatus.WALKING)
+			return isValidPosition(destination);
+		return destination == null;
+	}
+	
+	/**
+	 * Set the destination of this unit to the given destination.
+	 * 
+	 * @param  destination
+	 *         The new destination for this unit.
+	 * @post   The destination of this new unit is equal to
+	 *         the given destination.
+	 *       | new.getDestination() == destination
+	 * @throws IllegalArgumentException
+	 *         The given destination is not a valid destination for any
+	 *         unit.
+	 *       | ! isValidDestination(getDestination())
+	 */
+	@Raw
+	public void setDestination(double[] destination) 
+			throws IllegalArgumentException {
+		if (! isValidDestination(destination))
+			throw new IllegalArgumentException();
+		this.destination = destination;
+	}
+	
+	/**
+	 * Variable registering the destination of this unit.
+	 */
+	private double[] destination = null;
+	
+	/*END destination*/
 	
 	/* Weight */
 	/**
