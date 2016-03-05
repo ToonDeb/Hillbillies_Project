@@ -250,12 +250,28 @@ public class Unit {
 	 * Variable registering the position of this Unit.
 	 */
 	private double[] position;
+
+	/* END Position */
+	
+	/*Move*/
+	
+	/**
+	 * Returns a velocity vector that is used to update the units position in advanceTime
+	 * as it goes to a neighbouring cube.
+	 * 
+	 * @param destination
+	 * @return The velocity vector with as norm the speed of the vector, 
+	 * 		   and the same direction as the difference between destination and the current position.
+	 */
+	public void MoveToAdjacent(double[] destination) {
+		
+	}
+	
+	
+	/* Name*/
 	/**
 	 * Return the name of this unit.
 	 */
-	/* END Position */
-	
-	/* Name*/
 	@Basic @Raw
 	public String getName() {
 		return this.name;
@@ -520,17 +536,25 @@ private float orientation;
 	public float getSpeed() throws IllegalStateException{
 		
 		float vbase = this.getBaseSpeed();
+		float v;
+		UnitStatus status = this.getStatus();
 		
-		if (!(this.getStatus() == UnitStatus.WALKING))
-			throw new IllegalStateException("Unit not walking");
+		if (!(status == UnitStatus.WALKING) || !(status == UnitStatus.SPRINTING))
+			throw new IllegalStateException("Unit not moving!");
 		
-		else if (Util.fuzzyEquals(this.getPosition()[2] - this.getDestination()[2], -1))
-				return (float) (0.5*vbase);
+		if (Util.fuzzyEquals(this.getPosition()[2] - this.getDestination()[2], -1))
+				v = (float) (0.5*vbase);
 		else if (Util.fuzzyEquals(this.getPosition()[2] - this.getDestination()[2], 1))
-				return (float) (1.2*vbase);
+				v = (float) (1.2*vbase);
 		else
-			return vbase;
+			v = vbase;
+		
+		
+		if (status == UnitStatus.SPRINTING)
+				return (float) 2*v;
+		return (float) v;		
 	}
+	
 	/*END speed*/
 	/* destination */
 	
