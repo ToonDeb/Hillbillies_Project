@@ -2,10 +2,15 @@ package hillbillies.model;
 
 import hillbillies.model.UnitStatus;
 
+
+
 import java.util.Random;
+
+import javax.vecmath.*;
 
 import be.kuleuven.cs.som.annotate.*;
 import ogp.framework.util.Util;
+
 /**TODO declare variables for boundary and other constant values
 
 /**
@@ -152,7 +157,7 @@ public class Unit {
 	 *       | this.setDestination(destination)
 	 * xxxxxxxxxxONNODIGxxxxxxxxx
 	 */
-	public Unit(String name, double[] position, int weight, int strength, int agility, int toughness, double[] destination)
+	public Unit(String name, Vector3d position, int weight, int strength, int agility, int toughness, Vector3d destination)
 			throws IllegalArgumentException {
 
 		if (! isValidStartAttribute(strength))
@@ -186,17 +191,17 @@ public class Unit {
 	 * Return the position of this Unit.
 	 */
 	@Basic @Raw
-	public double[] getPosition() {
+	public Vector3d getPosition() {
 		return this.position;
 	}
-
+	
 	/**
 	 * Return the position of the cube occupied by this Unit.
 	 */
 	public int[] getCubePosition() {
-		int cubeX = (int) Math.floor(position[0]);
-		int cubeY = (int) Math.floor(position[1]);
-		int cubeZ = (int) Math.floor(position[2]);
+		int cubeX = (int) Math.floor(position.x);
+		int cubeY = (int) Math.floor(position.y);
+		int cubeZ = (int) Math.floor(position.z);
 		int []cubePosition = {cubeX, cubeY, cubeZ};
 		return cubePosition;
 	}
@@ -210,22 +215,18 @@ public class Unit {
 	 * @return	False if the given position is not effective.
 	 *		|	if (position == null)
 	 *		|		then result == false
-	 *			Otherwise, false if the given position doesn't have exactly three coordinates
-	 *      | 	else if (position.length != 3)
-	 *      |		then result == false
-	 *      	Otherwise, true if all three coordinates are within the boundaries of the map
+	 *			Otherwise, true if all three coordinates are within the boundaries of the map
 	 *		|	else if
-	 *		|	(position[0] >= 0) && (position[0] < 50) &&
-	 *		|	(position[1] >= 0) && (position[1] < 50) &&
-	 *		|	(position[2] >= 0) && (position[2] < 50)
-	 *		|		then result == true
+	 *		|		(position.x >= 0) && (position.x < 50) &&
+	 *		|		(position.y >= 0) && (position.y < 50) &&
+	 *		|		(position.z >= 0) && (position.z < 50)
+	 *		|			then result == true
 	 */
-	public static boolean isValidPosition(double[] position) {
+	public static boolean isValidPosition(Vector3d position) {
 		return position != null &&
-				position.length == 3 &&
-				(position[0] >= 0) && (position[0] < 50) &&
-				 (position[1] >= 0) && (position[1] < 50) &&
-				  (position[2] >= 0) && (position[2] < 50);
+				(position.x >= 0) && (position.x < 50) &&
+				 (position.y >= 0) && (position.y < 50) &&
+				  (position.z >= 0) && (position.z < 50);
 	}
 
 	/**
@@ -240,7 +241,7 @@ public class Unit {
 	 *       | ! isValidPosition(this.getPosition())
 	 */
 	@Raw
-	public void setPosition(double[] position) throws IllegalArgumentException {
+	public void setPosition(Vector3d position) throws IllegalArgumentException {
 		if (! isValidPosition(position))
 			throw new IllegalArgumentException("the given position is not a valid position");
 		this.position = position;
@@ -249,25 +250,38 @@ public class Unit {
 	/**
 	 * Variable registering the position of this Unit.
 	 */
-	private double[] position;
+	private Vector3d position;
 
 	/* END Position */
 	
-	/*Move*/
+	/*Movement*/
 	
 	/**
 	 * Returns a velocity vector that is used to update the units position in advanceTime
 	 * as it goes to a neighbouring cube.
 	 * 
 	 * @param destination
+	 * 			The neighbouring destination
 	 * @return The velocity vector with as norm the speed of the vector, 
 	 * 		   and the same direction as the difference between destination and the current position.
 	 */
-	public void MoveToAdjacent(double[] destination) {
+	public Vector3d moveToAdjacent(Vector3d destination) {
+		double xDistance = destination.x - this.getPosition().x;
+		double yDistance = destination.x - this.getPosition().y;
+		double zDistance = destination.x - this.getPosition().z;
 		
+		float totalDistance = (float) Math.sqrt(Math.pow(xDistance, 2) +
+										Math.pow(yDistance, 2)+ 
+											Math.pow(zDistance, 2));
+		float speed = this.getSpeed();
+		
+		Vector3d velocity = new Vector3d(speed*xDistance/totalDistance, 
+				speed*yDistance/totalDistance, 
+				speed*zDistance/totalDistance);
+		return velocity;	
 	}
 	
-	
+	/*END movement*/
 	/* Name*/
 	/**
 	 * Return the name of this unit.
@@ -357,7 +371,7 @@ public class Unit {
  */
 public Unit(float orientation) {
 	if (! isValidOrientation(orientation))
-		orientation = PI/2;
+		orientation = (float) (Math.PI/2);
 	setOrientation(orientation);
 }
 
@@ -432,10 +446,10 @@ private float orientation;
 	public void face(Unit other) throws IllegalArgumentException{
 		if (! this.canAttack(other))
 			throw new IllegalArgumentException("the other unit is not on a valid position");
-		double x_this = this.getPosition()[0];
-		double y_this = this.getPosition()[1];
-		double x_other = other.getPosition()[0];
-		double y_other = other.getPosition()[1];
+		double x_this = this.getPosition().x;
+		double y_this = this.getPosition().y;
+		double x_other = other.getPosition().x;
+		double y_other = other.getPosition().y;
 		
 		float this_orientation = (float) Math.atan2(y_other - y_this, x_other - x_this);
 				
@@ -468,9 +482,9 @@ private float orientation;
 	 * 			has the  same z-coordinate, 
 	 * 			an x-coordinate differing no more than 1 and 
 	 * 			a y-coordinate differing no more than 1.
-	 * 		  | return (this.getCubePosition[2] == other.getCubePosition[2]) &&
-	 * 		  |  (abs(this.getCubePosition[0] - other.getCubePosition[0]) < 2) &&
-	 * 		  |  (abs(this.getCubePosition[1] - other.getCubePosition[1]) < 2)
+	 * 		  | return (this.getCubePosition.z == other.getCubePosition.z) &&
+	 * 		  |  (abs(this.getCubePosition.x - other.getCubePosition.x) < 2) &&
+	 * 		  |  (abs(this.getCubePosition.y - other.getCubePosition.y) < 2)
 	 * @throws	IllegalArgumentException
 	 * 			The other unit is not effective
 	 * 		  | other == null
@@ -480,7 +494,7 @@ private float orientation;
 			throw new IllegalArgumentException("Non effective unit");
 		return (this.getCubePosition()[2] == other.getCubePosition()[2]) &&
 				(Math.abs(this.getCubePosition()[0] - other.getCubePosition()[0]) < 2) &&
-				(Math.abs(this.getCubePosition()[1] - other.getCubePosition()[1]) < 2);
+				(Math.abs(this.getCubePosition()[1]- other.getCubePosition()[1]) < 2);
 	}
 	
 	/**TODO: movetorandom expand documentation
@@ -542,9 +556,9 @@ private float orientation;
 		if (!(status == UnitStatus.WALKING) || !(status == UnitStatus.SPRINTING))
 			throw new IllegalStateException("Unit not moving!");
 		
-		if (Util.fuzzyEquals(this.getPosition()[2] - this.getDestination()[2], -1))
+		if (Util.fuzzyEquals(this.getPosition().z - this.getDestination().z, -1))
 				v = (float) (0.5*vbase);
-		else if (Util.fuzzyEquals(this.getPosition()[2] - this.getDestination()[2], 1))
+		else if (Util.fuzzyEquals(this.getPosition().z - this.getDestination().z, 1))
 				v = (float) (1.2*vbase);
 		else
 			v = vbase;
@@ -562,7 +576,7 @@ private float orientation;
 	 * Return the destination of this unit.
 	 */
 	@Basic @Raw
-	public double[] getDestination() {
+	public Vector3d getDestination() {
 		return this.destination;
 	}
 	
@@ -579,7 +593,7 @@ private float orientation;
 	 *       | else
 	 *       | 		return (destination == null)
 	*/
-	public boolean isValidDestination(double[] destination) {
+	public boolean isValidDestination(Vector3d destination) {
 		if (this.getStatus() == UnitStatus.WALKING)
 			return isValidPosition(destination);
 		return destination == null;
@@ -599,7 +613,7 @@ private float orientation;
 	 *       | ! isValidDestination(getDestination())
 	 */
 	@Raw
-	public void setDestination(double[] destination) 
+	public void setDestination(Vector3d destination) 
 			throws IllegalArgumentException {
 		if (! isValidDestination(destination))
 			throw new IllegalArgumentException();
@@ -609,7 +623,7 @@ private float orientation;
 	/**
 	 * Variable registering the destination of this unit.
 	 */
-	private double[] destination = null;
+	private Vector3d destination = null;
 	
 	/*END destination*/
 	
@@ -1411,4 +1425,6 @@ private float orientation;
 	 * Variable registering the defaultBoolean of this Unit.
 	 */
 	private boolean defaultBoolean;
+	
+	
 }
