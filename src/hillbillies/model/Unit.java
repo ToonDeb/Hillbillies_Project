@@ -118,6 +118,9 @@ public class Unit {
 	 *       | if (isValidStartAttribute(toughness))
 	 *       |   then new.getToughness() == toughness
 	 *       |   else new.getToughness() == 25
+	 *       
+	 * @post	the orientation of this new Unit is PI/2
+	 * 			| new.getOrientation == PI/2
 	 * xxxxxxxxxxONNODIGxxxxxxxxx
 	 * @param  stamina
  	 *         The stamina for this new Unit.
@@ -148,20 +151,16 @@ public class Unit {
 
 		if (! isValidStartAttribute(strength))
 			strength = 25;
-		else
-			setStrength(strength);
+		setStrength(strength);
 		if (! isValidStartAttribute(agility))
 			agility = 25;
-		else
-			setAgility(agility);
+		setAgility(agility);
 		if (! isValidStartWeight(weight))
-			weight = 25;
-		else
-			setAgility(weight);
+			weight = (this.getStrength() + this.getAgility())/2;
+		setWeight(weight);
 		if (! isValidStartAttribute(toughness))
 			toughness = 25;
-		else
-			setToughness(toughness);
+		setToughness(toughness);
 		this.setHP(this.getMaxHP());
 		this.setStamina(this.getMaxStamina());
 		this.setPosition(position);
@@ -277,10 +276,10 @@ public class Unit {
 			return false;
 		if (name.length() < 2)
 			return false;
-		if (!name.substring(0,1).matches("A-Z"))
+		if (! Character.isUpperCase(name.charAt(0)))
 			return false;
-		return name.substring(1).matches("[A-Za-z\'\" ]+");
-
+		return (name.matches("[A-Za-z\'\" ]+"));
+		
 
 	}
 
@@ -314,72 +313,49 @@ public class Unit {
 	
 	/*Orientation*/
 
+	/**
+	 * Return the orientation of this unit.
+	 */
+	@Basic @Raw
+	public float getOrientation() {
+		return this.orientation;
+	}
 
+	/**
+	 * Check whether the given orientation is a valid orientation for
+	 * any unit.
+	 *  
+	 * @param  orientation
+	 *         The orientation to check.
+	 * @return 
+	 *		   The orientation of the unit is between 0 and 2*Math.PI 		 	
+	 *       | orientation >= 0 && orientation < 2*Math.PI
+	 *       
+	*/
+	public static boolean isValidOrientation(float orientation) {
+		return orientation >= 0 && orientation < 2*Math.PI;
+	}
 
-/**
- * Initialize this new unit with given orientation.
- * 
- * @param  orientation
- *         The orientation for this new unit.
- * @post   If the given orientation is a valid orientation for any unit,
- *         the orientation of this new unit is equal to the given
- *         orientation. Otherwise, the orientation of this new unit is equal
- *         to PI/2.
- *       | if (isValidOrientation(orientation))
- *       |   then new.getOrientation() == orientation
- *       |   else new.getOrientation() == PI/2
- */
-public Unit(float orientation) {
-	if (! isValidOrientation(orientation))
-		orientation = PI/2;
-	setOrientation(orientation);
-}
+	/**
+	 * Set the orientation of this unit to the given orientation.
+	 * 
+	 * @param  orientation
+	 *         The new orientation for this unit.
+	 * @post   The orientation is set to the physically corresponding orientation between 0 and 2*Math.PI
+	 *       | new.getOrientation() == correspondingOrientation
+	 */
+	@Raw
+	public void setOrientation(float orientation) {
+		if (orientation >= 0)
+			this.orientation = (float) (orientation % 2*Math.PI);
+		else 
+			this.orientation = (float) (2*Math.PI - ( -orientation % 2*Math.PI));
+	}
 
-/**
- * Return the orientation of this unit.
- */
-@Basic @Raw
-public float getOrientation() {
-	return this.orientation;
-}
-
-/**
- * Check whether the given orientation is a valid orientation for
- * any unit.
- *  
- * @param  orientation
- *         The orientation to check.
- * @return 
- *		   The orientation of the unit is between 0 and 2*Math.PI 		 	
- *       | orientation >= 0 && orientation < 2*Math.PI
- *       
-*/
-public static boolean isValidOrientation(float orientation) {
-	return orientation >= 0 && orientation < 2*Math.PI;
-}
-
-/**
- * Set the orientation of this unit to the given orientation.
- * 
- * @param  orientation
- *         The new orientation for this unit.
- * @post   The orientation is set to the physically corresponding orientation between 0 and 2*Math.PI
- *       | new.getOrientation() == correspondingOrientation
- */
-@Raw
-public void setOrientation(float orientation) {
-	if (orientation >= 0)
-		this.orientation = (float) (orientation % 2*Math.PI);
-	else 
-		this.orientation = (float) (2*Math.PI - ( -orientation % 2*Math.PI));
-}
-
-/**
- * Variable registering the orientation of this unit.
- */
-private float orientation;
-
-	
+	/**
+	 * Variable registering the orientation of this unit.
+	 */
+	private float orientation = (float) Math.PI/2;
 
 
 	/**
@@ -1271,5 +1247,5 @@ private float orientation;
 	/**
 	 * Variable registering the defaultBoolean of this Unit.
 	 */
-	private boolean defaultBoolean;
+	private boolean defaultBoolean = false;
 }

@@ -25,8 +25,9 @@ public class Facade implements IFacade {
 		for(int i=0; i<initialPosition.length; i++) {
 			initialPositionDouble[i] = initialPosition[i];
 		}
-		Unit unit = new Unit(name, initialPositionDouble, weight, agility, strength, toughness);
-		
+		Unit unit = new Unit("name", initialPositionDouble, weight, agility, strength, toughness);
+		if (enableDefaultBehavior)
+			unit.startDefaultBehaviour();
 		return unit;
 	}
 
