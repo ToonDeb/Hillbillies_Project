@@ -1,13 +1,18 @@
 package hillbillies.model;
 
+import be.kuleuven.cs.som.annotate.*;
+
 /**
- * A class of ...
+ * An enumeration introducing different states units can be in.
  *
- * @author  ...
+ * @author  Toon Deburchgrave, Nathan Cornille
  * @version 1.0
  */
+@Value
 public enum UnitStatus {
 	WALKING,
+	
+	SPRINTING,
 	
 	WORKING,
 	
