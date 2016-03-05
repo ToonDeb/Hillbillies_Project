@@ -8,6 +8,7 @@ import javax.vecmath.*;
 public class UnitTest {
 	
 	private Unit testingUnit;
+	private Unit otherUnit;
 	
 	@Before
 	public void setUp(){
@@ -18,6 +19,8 @@ public class UnitTest {
 		position[2] = 25d;
 		Vector3d pos = new Vector3d(position);
 		testingUnit = new Unit("TestSubject", pos, 50, 50, 50, 50);
+		Vector3d other = new Vector3d(26d,25d,25d);
+		otherUnit = new Unit("OtherSubject", other ,50,50,50,50);
 	}
 	
 	@Test
@@ -185,8 +188,8 @@ public class UnitTest {
 	
 	@Test
 	public void testGetSetName$LegalCase(){
-		testingUnit.setName("GLaDOS Kills");
-		assertEquals(testingUnit.getName(), "GLaDOS Kills");
+		testingUnit.setName("Hillbilly");
+		assertEquals(testingUnit.getName(), "Hillbilly");
 	}
 	
 	@Test (expected = IllegalArgumentException.class)
@@ -222,5 +225,225 @@ public class UnitTest {
 		assertEquals(testingUnit.getWeight(), 150);
 	}
 	
+	@Test
+	public void testIsValidWeight$TrueCase(){
+		testingUnit.setAgility(50);
+		testingUnit.setStrength(50);
+		assertTrue(testingUnit.isValidWeight(100));
+	}
+	
+	@Test
+	public void testIsValidWeight$FalseTooLowCase(){
+		testingUnit.setAgility(50);
+		testingUnit.setStrength(50);
+		assertFalse(testingUnit.isValidWeight(10));
+	}
+	
+	@Test
+	public void testIsValidStartWeight$TrueCase(){
+		testingUnit.setAgility(50);
+		testingUnit.setStrength(50);
+		assertFalse(testingUnit.isValidStartWeight(60));
+	}
+	
+	@Test
+	public void testIsValidStartWeight$FalseTooHighCase(){
+		testingUnit.setAgility(50);
+		testingUnit.setStrength(50);
+		assertFalse(testingUnit.isValidStartWeight(150));
+	}
+	
+	@Test
+	public void testIsValidStartWeight$FalseTooLowCase(){
+		testingUnit.setAgility(50);
+		testingUnit.setStrength(50);
+		assertFalse(testingUnit.isValidStartWeight(15));
+	}
+	
+	@Test
+	public void testSetWeight$ValidValue(){
+		testingUnit.setAgility(50);
+		testingUnit.setStrength(50);
+		testingUnit.setWeight(100);
+		assertEquals(testingUnit.getWeight(), 100);
+	}
+	
+	@Test
+	public void testSetWeight$InvalidValue(){
+		testingUnit.setAgility(100);
+		testingUnit.setStrength(100);
+		testingUnit.setWeight(50);
+		assertEquals(testingUnit.getWeight(), 100);
+	}
+	
+	
+	@Test
+	public void testIsValidUnitAttribute$TrueCase(){
+		assertTrue(Unit.isValidUnitAttribute(50));
+	}
+	
+	@Test
+	public void testIsValidUnitAttribute$NegativeCase(){
+		assertFalse(Unit.isValidUnitAttribute(-5));
+	}
+	
+	@Test
+	public void testIsValidUnitAttribute$TooLargeCase(){
+		assertFalse(Unit.isValidUnitAttribute(500));
+	}
+	
+	@Test
+	public void testIsValidUnitAttribute$ZeroCase(){
+		assertFalse(Unit.isValidUnitAttribute(0));
+	}
+	
+	@Test
+	public void testIsValidStartAttribute$TrueCase(){
+		assertTrue(Unit.isValidStartAttribute(50));
+	}
+	
+	@Test
+	public void testIsValidStartAttribute$NegativeCase(){
+		assertFalse(Unit.isValidStartAttribute(-5));
+	}
+	
+	@Test
+	public void testIsValidStartAttribute$TooLargeCase(){
+		assertFalse(Unit.isValidStartAttribute(150));
+	}
+	
+	@Test
+	public void testIsValidStartAttribute$ZeroCase(){
+		assertFalse(Unit.isValidStartAttribute(0));
+	}
+	
+	@Test
+	public void testSetGetStrength$ValidCase(){
+		testingUnit.setStrength(50);
+		assertEquals(testingUnit.getStrength(), 50);
+	}
+	
+	@Test
+	public void testSetGetStrength$InvalidCase(){
+		testingUnit.setStrength(-5);
+		assertEquals(testingUnit.getStrength(), 25);
+	}
+	
+	@Test
+	public void testSetGetAgility$ValidCase(){
+		testingUnit.setAgility(50);
+		assertEquals(testingUnit.getAgility(), 50);
+	}
+	
+	@Test
+	public void testSetGetAgility$InvalidCase(){
+		testingUnit.setAgility(-5);
+		assertEquals(testingUnit.getAgility(), 25);
+	}
+	
+	@Test
+	public void testSetGetToughness$ValidCase(){
+		testingUnit.setToughness(50);
+		assertEquals(testingUnit.getToughness(), 50);
+	}
+	
+	@Test
+	public void testSetGetToughness$InvalidCase(){
+		testingUnit.setToughness(-5);
+		assertEquals(testingUnit.getToughness(), 25);
+	}
+	
+	@Test
+	public void testSetGetHP$ValidCase(){
+		testingUnit.setWeight(100);
+		testingUnit.setToughness(100);
+		testingUnit.setHP(50);
+		assertEquals(testingUnit.getHP(), 50);
+	}
+	
+	@Test
+	public void testGetMaxHP(){
+		testingUnit.setWeight(100);
+		testingUnit.setToughness(100);
+		assertEquals(testingUnit.getMaxHP(), 200);
+	}
+	
+	@Test
+	public void testIsValidHP$TrueCase(){
+		testingUnit.setWeight(100);
+		testingUnit.setToughness(100);
+		assertTrue(testingUnit.isValidHP(100));
+	}
+	
+	@Test
+	public void testIsValidHP$TooLowCase(){
+		testingUnit.setWeight(100);
+		testingUnit.setToughness(100);
+		assertFalse(testingUnit.isValidHP(-5));
+	}
+	
+	@Test
+	public void testIsValidHP$TooHighCase(){
+		testingUnit.setWeight(100);
+		testingUnit.setToughness(100);
+		assertFalse(testingUnit.isValidHP(500));
+	}
+	
+	@Test
+	public void testSetGetStamina(){
+		testingUnit.setWeight(100);
+		testingUnit.setToughness(100);
+		testingUnit.setStamina(50);
+		assertEquals(testingUnit.getStamina(), 50);
+	}
+	
+	@Test
+	public void testGetMaxStamine(){
+		testGetMaxHP();
+	}
+	
+	@Test
+	public void testIsValidStamina$TrueCase(){
+		testingUnit.setWeight(100);
+		testingUnit.setToughness(100);
+		assertTrue(testingUnit.isValidStamina(100));
+	}
+	
+	@Test
+	public void testIsValidStamina$TooLowCase(){
+		testingUnit.setWeight(100);
+		testingUnit.setToughness(100);
+		assertFalse(testingUnit.isValidStamina(-5));
+	}
+	
+	@Test
+	public void testIsValidStamina$TooHighCase(){
+		testingUnit.setWeight(100);
+		testingUnit.setToughness(100);
+		assertFalse(testingUnit.isValidStamina(500));
+	}
+	
+	@Test
+	public void testWork(){
+		testingUnit.work();
+		assertTrue(testingUnit.getStatus()== UnitStatus.WORKING);
+	}
+	
+	@Test
+	public void testAttack$ValidCase(){
+		otherUnit.setPosition(new Vector3d(26d,25d,25d));
+		testingUnit.setPosition(new Vector3d(25d,25d,25d));
+		testingUnit.attack(otherUnit);
+		assertTrue(testingUnit.getStatus()== UnitStatus.ATTACKING);
+		assertTrue(otherUnit.getStatus()==UnitStatus.DEFENDING);
+	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void testAttack$InvalidPositionCase(){
+		otherUnit.setPosition(new Vector3d(27d,25d,25d));
+		testingUnit.setPosition(new Vector3d(25d,25d,25d));
+		testingUnit.attack(otherUnit);
+		fail("Exception Expected");
+	}
 	
 }

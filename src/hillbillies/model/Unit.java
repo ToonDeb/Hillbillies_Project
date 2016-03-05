@@ -475,32 +475,7 @@ public class Unit {
 	
 	
 	
-	/* Attributes */
-	/**
-	 * Check whether the given attribute is a valid attribute for
-	 * any Unit.
-	 *
-	 * @param  attribute
-	 *         The attribute to check.
-	 * @return
-	 *       | result == ((1 <= attribute) && (attribute < 200))
-	*/
-	public static boolean isValidUnitAttribute(int attribute) {
-		return ((1 <= attribute) && (attribute <= 200));
-	}
-
-	/**
-	 * Check whether the given attribute is a valid attribute for
-	 * the initialization of any Unit
-	 *
-	 * @param 	toughness
-	 * 			The attribute to check
-	 * @return
-	 *		| result == ((25 <= attribute) && (attribute <= 100)
-	 */
-	public boolean isValidStartAttribute(int attribute){
-		return ((25 <= attribute) && (attribute <= 100));
-	}
+	
 	
 	/* Speed */
 	/**
@@ -641,7 +616,7 @@ public class Unit {
 	 *         the weight of this new Unit is equal to the given
 	 *         weight.
 	 *       | if (isValidWeight(weight))
-	 *       |   then new.getWeight() == weight
+	 *       |   	then new.getWeight() == weight
 	 *       | else
 	 *		 |		this.weight = (this.getStrength() + this.getAgility())/2
 	 */
@@ -660,6 +635,32 @@ public class Unit {
 	
 	/* END Weight*/
 	
+	/* Attributes */
+	/**
+	 * Check whether the given attribute is a valid attribute for
+	 * any Unit.
+	 *
+	 * @param  attribute
+	 *         The attribute to check.
+	 * @return
+	 *       | result == ((1 <= attribute) && (attribute < 200))
+	*/
+	public static boolean isValidUnitAttribute(int attribute) {
+		return ((1 <= attribute) && (attribute <= 200));
+	}
+
+	/**
+	 * Check whether the given attribute is a valid attribute for
+	 * the initialization of any Unit
+	 *
+	 * @param 	toughness
+	 * 			The attribute to check
+	 * @return
+	 *		| result == ((25 <= attribute) && (attribute <= 100)
+	 */
+	public static boolean isValidStartAttribute(int attribute){
+		return ((25 <= attribute) && (attribute <= 100));
+	}
 	
 	/* Strength*/
 	/**
@@ -904,7 +905,7 @@ public class Unit {
 	 * Return the workTime of this Unit.
 	 */
 	@Basic @Raw
-	public double getWorkTime() {
+	private double getWorkTime() {
 		return this.worktime;
 	}
 
@@ -917,7 +918,7 @@ public class Unit {
 	 * @return
 	 *       | result == (worktime >= 0)
 	*/
-	public static boolean isValidWorkTime(double worktime) {
+	private static boolean isValidWorkTime(double worktime) {
 		return Util.fuzzyGreaterThanOrEqualTo(worktime, 0);
 	}
 
@@ -949,7 +950,7 @@ public class Unit {
 	 * @throws 	IllegalArgumentException
 	 * 			The given time is not a valid time for any Unit.
 	 */
-	public void advanceWorkTime(double time) throws IllegalArgumentException{
+	private void advanceWorkTime(double time) throws IllegalArgumentException{
 		if (! isValidTime(time))
 				throw new IllegalArgumentException("The given time is not a valid time");
 
@@ -993,7 +994,7 @@ public class Unit {
 	 * Return the attackCountDown of this Unit.
 	 */
 	@Basic @Raw
-	public double getAttackCountDown() {
+	private double getAttackCountDown() {
 		return this.attackCountDown;
 	}
 
@@ -1006,7 +1007,7 @@ public class Unit {
 	 * @return
 	 *       | result == (0 <= attackCountDown <=1 )
 	*/
-	public static boolean isValidAttackCountDown(double attackCountDown) {
+	private static boolean isValidAttackCountDown(double attackCountDown) {
 		return ((Util.fuzzyGreaterThanOrEqualTo(attackCountDown, 0)) &&
 				(Util.fuzzyGreaterThanOrEqualTo(1, attackCountDown)));
 	}
@@ -1042,7 +1043,7 @@ public class Unit {
 	 * 			The given time is not a valid time for any Unit.
 	 * 			| ! isValidTime(time)
 	 */
-	public void advanceAttackTime(double time) throws IllegalArgumentException{
+	private void advanceAttackTime(double time) throws IllegalArgumentException{
 		if (! isValidTime(time))
 				throw new IllegalArgumentException("The given time is not a valid time");
 

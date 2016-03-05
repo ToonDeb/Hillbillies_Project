@@ -39,7 +39,9 @@ public class Facade implements IFacade {
 	 */
 	@Override
 	public double[] getPosition(Unit unit) throws ModelException {
-		return unit.getPosition();
+		Vector3d vector = unit.getPosition();
+		double[] position = {vector.x, vector.y, vector.z};
+		return position;
 	}
 
 	/* (non-Javadoc)
