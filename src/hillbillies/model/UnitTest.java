@@ -3,6 +3,7 @@ package hillbillies.model;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.Before;
+import javax.vecmath.*;
 
 public class UnitTest {
 	
@@ -15,7 +16,8 @@ public class UnitTest {
 		position[0] = 25d;
 		position[1] = 25d;
 		position[2] = 25d;
-		testingUnit = new Unit("TestSubject", position, 50, 50, 50, 50);
+		Vector3d pos = new Vector3d(position);
+		testingUnit = new Unit("TestSubject", pos, 50, 50, 50, 50);
 	}
 	
 	@Test
@@ -25,7 +27,8 @@ public class UnitTest {
 		position[0] = 12d;
 		position[1] = 15d;
 		position[2] = 2d;
-		Unit unit = new Unit("TestSubject", position, 50, 50, 50, 50);
+		Vector3d pos = new Vector3d(position);
+		Unit unit = new Unit("TestSubject", pos, 50, 50, 50, 50);
 		
 		assertEquals(unit.getPosition(), position);
 		assertEquals(unit.getStrength(), 50);
@@ -43,7 +46,8 @@ public class UnitTest {
 		position[0] = 51d;
 		position[1] = 51d;
 		position[2] = 51d;
-		Unit unit = new Unit("TestSubject", position, 50, 50, 50, 50);
+		Vector3d pos = new Vector3d(position);
+		Unit unit = new Unit("TestSubject", pos, 50, 50, 50, 50);
 		fail("Exception Expected!");
 	}
 	
@@ -55,7 +59,8 @@ public class UnitTest {
 		position[0] = 40d;
 		position[1] = 40d;
 		position[2] = 40d;
-		Unit unit = new Unit("TestSubject", position, 50, 24, 50, 50);
+		Vector3d pos = new Vector3d(position);
+		Unit unit = new Unit("TestSubject", pos, 50, 24, 50, 50);
 		assertEquals(unit.getStrength(), 25);
 	}
 	
@@ -67,7 +72,8 @@ public class UnitTest {
 		position[0] = 40d;
 		position[1] = 40d;
 		position[2] = 40d;
-		Unit unit = new Unit("TestSubject", position, 50, 50, 150, 50);
+		Vector3d pos = new Vector3d(position);
+		Unit unit = new Unit("TestSubject", pos, 50, 50, 150, 50);
 		assertEquals(unit.getAgility(), 25);
 	}
 	
@@ -79,7 +85,8 @@ public class UnitTest {
 		position[0] = 40d;
 		position[1] = 40d;
 		position[2] = 40d;
-		Unit unit = new Unit("TestSubject", position, 50, 50, 50, 250);
+		Vector3d pos = new Vector3d(position);
+		Unit unit = new Unit("TestSubject", pos, 50, 50, 50, 250);
 		assertEquals(unit.getToughness(), 25);
 	}
 	
@@ -90,7 +97,8 @@ public class UnitTest {
 		position[0] = 40d;
 		position[1] = 40d;
 		position[2] = 40d;
-		Unit unit = new Unit("TestSubject", position, 30, 50, 50, 50);
+		Vector3d pos = new Vector3d(position);
+		Unit unit = new Unit("TestSubject", pos, 30, 50, 50, 50);
 		assertEquals(unit.getWeight(), 50);
 	}
 	
@@ -102,7 +110,8 @@ public class UnitTest {
 		position[0] = 40.5d;
 		position[1] = 40.75d;
 		position[2] = 40.49d;
-		testingUnit.setPosition(position);
+		Vector3d pos = new Vector3d(position);
+		testingUnit.setPosition(pos);
 		assertEquals(testingUnit.getPosition(), position);
 	}
 	
@@ -113,7 +122,8 @@ public class UnitTest {
 		position[0] = 40.5d;
 		position[1] = 40.75d;
 		position[2] = 40.49d;
-		testingUnit.setPosition(position);
+		Vector3d pos = new Vector3d(position);
+		testingUnit.setPosition(pos);
 		int[] cubePosition = {40,40,40};
 		assertArrayEquals(testingUnit.getCubePosition(), cubePosition);
 	}
@@ -122,23 +132,21 @@ public class UnitTest {
 	
 	@Test (expected = IllegalArgumentException.class)
 	public void testSetPosition$IllegalXCase() throws IllegalArgumentException{
-		double[] position;
-		position = new double[3];
-		position[0] = 100d;
-		position[1] = 40d;
-		position[2] = 40d;
+		Vector3d position = new Vector3d(100d, 40d, 40d);
 		testingUnit.setPosition(position);
 		fail("Exception Expected!");
 	}
 	
 	@Test (expected = IllegalArgumentException.class)
 	public void testSetPosition$IllegalYCase() throws IllegalArgumentException{
+		
 		double[] position;
 		position = new double[3];
 		position[0] = 40d;
 		position[1] = 100d;
 		position[2] = 40d;
-		testingUnit.setPosition(position);
+		Vector3d pos = new Vector3d(position);
+		testingUnit.setPosition(pos);
 		fail("Exception Expected!");
 	}
 	
@@ -149,26 +157,30 @@ public class UnitTest {
 		position[0] = 40d;
 		position[1] = 40d;
 		position[2] = -10d;
-		testingUnit.setPosition(position);
+		Vector3d pos = new Vector3d(position);
+		testingUnit.setPosition(pos);
 		fail("Exception Expected!");
 	}
 	
 	@Test
 	public void testIsValidPosition$TrueCase(){
 		double[] position = {1.58d, 49.89d, 35.45875d};
-		assertTrue(Unit.isValidPosition(position));
+		Vector3d pos = new Vector3d(position);
+		assertTrue(Unit.isValidPosition(pos));
 	}
 	
 	@Test
 	public void testIsValidPosition$NegativeCase(){
 		double[] position = {-5.54d, 5.4785d, 6.69d};
-		assertFalse(Unit.isValidPosition(position));
+		Vector3d pos = new Vector3d(position);
+		assertFalse(Unit.isValidPosition(pos));
 	}
 	
 	@Test
 	public void testIsValidPosition$ToHighCase(){
 		double[] position = {55.54d, 5.4785d, 6.69d};
-		assertFalse(Unit.isValidPosition(position));
+		Vector3d pos = new Vector3d(position);
+		assertFalse(Unit.isValidPosition(pos));
 	}
 	
 	@Test
@@ -201,6 +213,14 @@ public class UnitTest {
 		fail("Exception Expected!");
 	}
 	
+	// setName uses the same tests as isValidName, because it
+	// calls the method to throw the exception
+	
+	@Test
+	public void testGetWeight(){
+		testingUnit.setWeight(150);
+		assertEquals(testingUnit.getWeight(), 150);
+	}
 	
 	
 }

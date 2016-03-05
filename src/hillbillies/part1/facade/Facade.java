@@ -3,6 +3,8 @@
  */
 package hillbillies.part1.facade;
 
+import javax.vecmath.Vector3d;
+
 import hillbillies.model.Unit;
 import hillbillies.model.UnitStatus;
 import ogp.framework.util.ModelException;
@@ -25,7 +27,8 @@ public class Facade implements IFacade {
 		for(int i=0; i<initialPosition.length; i++) {
 			initialPositionDouble[i] = initialPosition[i];
 		}
-		Unit unit = new Unit("name", initialPositionDouble, weight, agility, strength, toughness);
+		Vector3d position = new Vector3d(initialPositionDouble);
+		Unit unit = new Unit(name, position, weight, agility, strength, toughness);
 		if (enableDefaultBehavior)
 			unit.startDefaultBehaviour();
 		return unit;

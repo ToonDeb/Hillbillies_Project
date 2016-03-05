@@ -160,7 +160,7 @@ public class Unit {
 	 *       | this.setDestination(destination)
 	 * xxxxxxxxxxONNODIGxxxxxxxxx
 	 */
-	public Unit(String name, Vector3d position, int weight, int strength, int agility, int toughness, Vector3d destination)
+	public Unit(String name, Vector3d position, int weight, int strength, int agility, int toughness)
 			throws IllegalArgumentException {
 
 		if (! isValidStartAttribute(strength))
@@ -182,7 +182,6 @@ public class Unit {
 		this.setName(name);
 
 		this.setStatus(UnitStatus.IDLE);
-		this.setDestination(destination);
 	}
 
 	/* Position */
@@ -376,7 +375,7 @@ public class Unit {
 		return orientation >= 0 && orientation < 2*Math.PI;
 	}
 
-<<<<<<< HEAD
+
 	/**
 	 * Set the orientation of this unit to the given orientation.
 	 * 
@@ -392,80 +391,6 @@ public class Unit {
 		else 
 			this.orientation = (float) (2*Math.PI - ( -orientation % 2*Math.PI));
 	}
-=======
-/**
- * Initialize this new unit with given orientation.
- * 
- * @param  orientation
- *         The orientation for this new unit.
- * @post   If the given orientation is a valid orientation for any unit,
- *         the orientation of this new unit is equal to the given
- *         orientation. Otherwise, the orientation of this new unit is equal
- *         to PI/2.
- *       | if (isValidOrientation(orientation))
- *       |   then new.getOrientation() == orientation
- *       |   else new.getOrientation() == PI/2
- */
-public Unit(float orientation) {
-	if (! isValidOrientation(orientation))
-		orientation = (float) (Math.PI/2);
-	setOrientation(orientation);
-}
-
-/**
- * Return the orientation of this unit.
- */
-@Basic @Raw
-public float getOrientation() {
-	return this.orientation;
-}
-
-/**
- * Check whether the given orientation is a valid orientation for
- * any unit.
- *  
- * @param  orientation
- *         The orientation to check.
- * @return 
- *		   The orientation of the unit is between 0 and 2*Math.PI 		 	
- *       | orientation >= 0 && orientation < 2*Math.PI
- *       
-*/
-public static boolean isValidOrientation(float orientation) {
-	return orientation >= 0 && orientation < 2*Math.PI;
-}
-
-/**
- * Set the orientation of this unit to the given orientation.
- * 
- * @param  orientation
- *         The new orientation for this unit.
- * @post   The orientation is set to the physically corresponding orientation between 0 and 2*Math.PI.
- * 		   For positive orientation, this is the remainder of a division by 2*Math.PI.
- * 		   For negative orientation, this is 2*Math.PI minus the remainder of a division by
- * 			2*Math.PI of the absolute value of the given orientation.
- *       | if (orientation >= 0)
- *       | 		let
- *       | 			correspondingOrientation = (orientation % 2*Math.PI)
- *       | else
- *       | 		let
- *       | 			correspondingOrientation = (2*Math.PI - ( -orientation % 2*Math.PI))
- *       | in
- *       |		new.getOrientation() == correspondingOrientation
- */
-@Raw
-public void setOrientation(float orientation) {
-	if (orientation >= 0)
-		this.orientation = (float) (orientation % 2*Math.PI);
-	else 
-		this.orientation = (float) (2*Math.PI - ( -orientation % 2*Math.PI));
-}
-
-/**
- * Variable registering the orientation of this unit.
- */
-private float orientation;
->>>>>>> refs/remotes/origin/master
 
 	/**
 	 * Variable registering the orientation of this unit.
@@ -717,11 +642,15 @@ private float orientation;
 	 *         weight.
 	 *       | if (isValidWeight(weight))
 	 *       |   then new.getWeight() == weight
+	 *       | else
+	 *		 |		this.weight = (this.getStrength() + this.getAgility())/2
 	 */
 	@Raw
 	public void setWeight(int weight) {
 		if (isValidWeight(weight))
 			this.weight = weight;
+		else
+			this.weight = (this.getStrength() + this.getAgility())/2;
 	}
 
 	/**
@@ -750,12 +679,16 @@ private float orientation;
 	 *         the strength of this new Unit is equal to the given
 	 *         strength.
 	 *       | if (isValidUnitAttribute(strength))
-	 *       |   then new.getStrength() == strength
+	 *       |   	then new.getStrength() == strength
+	 *       | else
+	 *       		new.getStrength() == 25
 	 */
 	@Raw
 	public void setStrength(int strength) {
 		if (isValidUnitAttribute(strength))
 			this.strength = strength;
+		else
+			this.strength = 25;
 	}
 
 	/**
@@ -785,11 +718,15 @@ private float orientation;
 	 *         agility.
 	 *       | if (isValidUnitAttribute(agility))
 	 *       |   then new.getAgility() == agility
+	 *       | else
+	 *       |	 new.getAgility() == 25
 	 */
 	@Raw
 	public void setAgility(int agility) {
 		if (isValidUnitAttribute(agility))
 			this.agility = agility;
+		else
+			this.agility = 25;
 	}
 
 	/**
@@ -819,11 +756,15 @@ private float orientation;
 	 *         toughness.
 	 *       | if (isValidUnitAttribute(toughness))
 	 *       |   then new.getToughness() == toughness
+	 *		 | else
+	 *		 | 	 new.getToughness() == 25
 	 */
 	@Raw
 	public void setToughness(int toughness) {
 		if (isValidUnitAttribute(toughness))
 			this.toughness = toughness;
+		else
+			this.toughness = 25;
 	}
 
 	/**
@@ -956,7 +897,7 @@ private float orientation;
 	 */
 	public void work() throws IllegalArgumentException {
 		this.setWorkTime(500.0d /strength);
-		this.status = UnitStatus.WORKING;
+		this.setStatus(UnitStatus.WORKING);
 	}
 
 	/**
@@ -1465,11 +1406,7 @@ private float orientation;
 	/**
 	 * Variable registering the defaultBoolean of this Unit.
 	 */
-<<<<<<< HEAD
+
 	private boolean defaultBoolean = false;
-=======
-	private boolean defaultBoolean;
-	
-	
->>>>>>> refs/remotes/origin/master
+
 }
