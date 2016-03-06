@@ -241,7 +241,7 @@ public class Unit {
 	 *       | ! isValidPosition(this.getPosition())
 	 */
 	@Raw
-	private void setPosition(Vector3d position) throws IllegalArgumentException {
+	public void setPosition(Vector3d position) throws IllegalArgumentException {
 		if (! isValidPosition(position))
 			throw new IllegalArgumentException("the given position is not a valid position");
 		this.position = position;
