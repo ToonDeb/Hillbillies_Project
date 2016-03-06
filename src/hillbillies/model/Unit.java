@@ -1675,8 +1675,7 @@ public class Unit {
 	 *         Unit.
 	 *       | ! isValidStatus(getStatus())
 	 */
-	@Raw
-	private void setStatus(UnitStatus status) throws IllegalArgumentException {
+	@Raw void setStatus(UnitStatus status) throws IllegalArgumentException {
 		if (! isValidStatus(status))
 			throw new IllegalArgumentException();
 		this.status = status;
