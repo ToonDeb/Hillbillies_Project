@@ -70,6 +70,9 @@ import ogp.framework.util.Util;
  * @invar  The adjacentDestination of each unit must be a valid adjacentDestination for any
  *         unit.
  *       | isValidAdjacentDestination(getAdjacentDestination())
+ * @invar  The finalDestination of each unit must be a valid finalDestination for any
+ *         unit.
+ *       | isValidFinalDestination(getFinalDestination())
  *
  * @version 0.1
  */
@@ -163,9 +166,14 @@ public class Unit {
 	 * @effect The adjacentDestination of this new unit is set to
 	 *         the given adjacentDestination.
 	 *       | this.setAdjacentDestination(adjacentDestination)
+	 * @param  finalDestination
+	 *         The finalDestination for this new unit.
+	 * @effect The finalDestination of this new unit is set to
+	 *         the given finalDestination.
+	 *       | this.setFinalDestination(finalDestination)
 	 * xxxxxxxxxxONNODIGxxxxxxxxx
 	 */
-	public Unit(String name, Vector3d position, float orientation, int weight, int strength, int agility, int toughness, Vector3d adjacentDestination)
+	public Unit(String name, Vector3d position, float orientation, int weight, int strength, int agility, int toughness, Vector3d adjacentDestination, Vector3d finalDestination)
 			throws IllegalArgumentException {
 
 		if (! isValidStartAttribute(strength))
@@ -195,6 +203,7 @@ public class Unit {
 
 		this.setStatus(UnitStatus.IDLE);
 		this.setAdjacentDestination(adjacentDestination);
+		this.setFinalDestination(finalDestination);
 	}
 
 	/* Position */
@@ -293,6 +302,68 @@ public class Unit {
 		this.setAdjacentDestination(adjacentDestination);
 			
 	}
+	/**
+	 * Sets the units status to walking, and the units adjacentDestination to adjacentDestination.
+	 * 
+	 * @param	finalDestination
+	 * 			The final destination for this unit.
+	 * @effect 	The units status is set to WALKING, the units finalDestination is set to finalDestination
+	 * 		|  	this.setStatus(UnitStatus.WALKING);
+			|  	this.setFinalDestination(finalDestination);
+	 * @throws 	IllegalArgumentException
+	 * 			The given finalDestination is not a valid finalDestination
+	 * 		|	! isValidFinalDestination(finalDestination)
+	 */
+	public void moveTo(Vector3d finalDestination) throws IllegalArgumentException {
+		if (! isValidFinalDestination(finalDestination))
+			throw new IllegalArgumentException("Invalid final destination!");
+		this.setStatus(UnitStatus.WALKING);
+		this.setFinalDestination(finalDestination);
+
+	}
+	/**
+	 * Return the next step (the adjacent destination) of this unit based on its final destination.
+	 * 
+	 * @return
+	 */
+	public Vector3d findPath() {
+		double xFinalDes = this.getFinalDestination().getX();
+		double yFinalDes = this.getFinalDestination().getY();
+		double zFinalDes = this.getFinalDestination().getZ();
+		
+		double xThis = this.getPosition().getX();
+		double yThis = this.getPosition().getY();
+		double zThis = this.getPosition().getZ();
+		
+		double xAdjDes;
+		double yAdjDes;
+		double zAdjDes;
+		
+		if (Util.fuzzyEquals(xThis, xFinalDes))
+			xAdjDes = this.getCubePosition()[0] + 0.5;
+		else if (xThis < xFinalDes)
+			xAdjDes = this.getCubePosition()[0] + 1.5;
+		else
+			xAdjDes = this.getCubePosition()[0] - 0.5;
+		
+		if (Util.fuzzyEquals(yThis, yFinalDes))
+			yAdjDes = this.getCubePosition()[1] + 0.5;
+		else if (yThis < yFinalDes)
+			yAdjDes = this.getCubePosition()[1] + 1.5;
+		else
+			yAdjDes = this.getCubePosition()[1] - 0.5;
+		
+		if (Util.fuzzyEquals(zThis, zFinalDes))
+			zAdjDes = this.getCubePosition()[2] + 0.5;
+		else if (zThis < zFinalDes)
+			zAdjDes = this.getCubePosition()[2] + 1.5;
+		else
+			zAdjDes = this.getCubePosition()[2] - 0.5;
+		return new Vector3d(xAdjDes, yAdjDes, zAdjDes);
+
+		
+			
+	}
 	
 	/***
 	 * 
@@ -310,9 +381,9 @@ public class Unit {
 	 * @param 	adjacentDestination
 	 * 			The adjacentDestination of the unit.
 	 * @post	The new position of this unit is where the unit would be if it went at its speed, towards the given adjacentDestination, 
-	 * 				during the given time.
-	 * 
+	 * 				during the given time, if that position doesn't equal or surpass the adjacentDestination.
 	 * 		|	let 
+	 * 		| 		oldPosition = this.getPosition()
 	 * 		|		xDistance = adjacentDestination.x - this.getPosition().x,
 	 * 		|		yDistance = adjacentDestination.x - this.getPosition().y,
 	 *		|		zDistance = adjacentDestination.x - this.getPosition().z,
@@ -324,8 +395,15 @@ public class Unit {
 	 *		|							speed*yDistance/totalDistance, 
 	 *		|							speed*zDistance/totalDistance),
 	 *		|		newPosition = velocity*time + this.getPosition()
+	 *		|		newDistance = (newPosition - adjacentDestination)
+	 *		|		oldDistance = (oldPosition - adjacentDestination)
 	 * 		|	in
-	 * 		|		new.getPosition == newPosition		
+	 * 		|		if (( old.Position != adjacentDestination) && 
+	 * 		|				(! (newDistance).length < (oldDistance).length))
+	 * 		|			new.getPosition == newPosition
+	 * 		|		else
+	 * 		|			new.getPosition == adjacentDestination	
+	 * 
 	 * @throws	IllegalArgumentException
 	 * 			The given time is not a valid time
 	 * 		|	! isValidTime(time)
@@ -339,11 +417,27 @@ public class Unit {
 		moveToAdjacent(adjacentDestination);
 		if (!isValidTime(time))
 			throw new IllegalArgumentException("Invalid time!");
-		
-		Vector3d result = this.getVelocity(adjacentDestination);
-		result.scaleAdd(time, this.getPosition());
-		this.setPosition(result);
-		
+		// Check that destination hasn't been reached.
+		if (! Util.fuzzyEquals(this.getPosition().getX(),adjacentDestination.getX())
+				
+			Vector3d result = this.getVelocity(adjacentDestination);
+			result.scaleAdd(time, this.getPosition());
+			
+			// Check that destination hasn't been surpassed.
+			Vector3d newDistance;
+			Vector3d oldDistance;
+			newDistance.sub(result, adjacentDestination);
+			oldDistance.sub(this.getPosition(), adjacentDestination);
+			
+			if (newDistance.length() < oldDistance.length())
+				this.setPosition(result);
+
+				
+			
+		// Destination reached or surpassed
+		else
+			this.setPosition(adjacentDestination);
+			this.setStatus(UnitStatus.IDLE);
 	}
 	/**
 	 * Return the velocity of the unit as a vector.
@@ -766,7 +860,7 @@ public class Unit {
 	 *  
 	 * @param  	adjacentDestination
 	 *         	The adjacentDestination to check.
-	 * @return 	True if the adjacentDestination the centre of a valid neighbouring position.
+	 * @return 	True if the adjacentDestination is the centre of a valid neighbouring position.
 	 *       |		return 
 	 *       |		(isValidPosition(adjacentDestination) &&
 	 *		 |		(!(Math.abs(this.getPosition().x - adjacentDestination.x)>1)) && ((adjacentDestination.x % 1) == 0.5) &&
@@ -812,6 +906,57 @@ public class Unit {
 	
 	/*END adjacentDestination*/
 	
+	/* finalDestination */
+	
+	/**
+	 * Return the finalDestination of this unit.
+	 */
+	@Basic @Raw
+	public Vector3d getFinalDestination() {
+		return this.finalDestination;
+	}
+	
+	/**
+	 * Check whether the given finalDestination is a valid finalDestination for
+	 * this unit.
+	 *  
+	 * @param  	finalDestination
+	 *         	The finalDestination to check.
+	 * @return 	True if the finalDestination is a valid position.
+	 *       |		return 
+	 *       |		isValidPosition(finalDestination) 
+	*/
+	public boolean isValidFinalDestination(Vector3d finalDestination) {
+		return isValidPosition(finalDestination);
+	}
+	
+	/**
+	 * Set the finalDestination of this unit to the given finalDestination.
+	 * 
+	 * @param  finalDestination
+	 *         The new finalDestination for this unit.
+	 * @post   The finalDestination of this unit is equal to
+	 *         the given finalDestination.
+	 *       | new.getFinalDestination() == finalDestination
+	 * @throws IllegalArgumentException
+	 *         The given finalDestination is not a valid finalDestination for any
+	 *         unit.
+	 *       | ! isValidFinalDestination(getFinalDestination())
+	 */
+	@Raw
+	public void setFinalDestination(Vector3d finalDestination) 
+			throws IllegalArgumentException {
+		if (! isValidFinalDestination(finalDestination))
+			throw new IllegalArgumentException();
+		this.finalDestination = finalDestination;
+	}
+	
+	/**
+	 * Variable registering the finalDestination of this unit.
+	 */
+	private Vector3d finalDestination = null;
+	
+	/*END finalDestination*/
 	/* Weight */
 	/**
 	 * Return the weight of this Unit.
