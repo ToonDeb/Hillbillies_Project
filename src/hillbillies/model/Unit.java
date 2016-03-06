@@ -11,7 +11,9 @@ import ogp.framework.util.Util;
 
 
 /**
- * @authors Toon, Nathan
+ * @authors Toon Deburchgrave CWS-ELT, Nathan Cornille CWS-WTK
+ * repository: https://github.com/ToonDeb/Hillbillies_Project
+ * 
  * A class for Units
  *
  * @invar  The position of each Unit must be a valid position for any
