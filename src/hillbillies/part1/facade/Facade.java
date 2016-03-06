@@ -25,7 +25,7 @@ public class Facade implements IFacade {
 		// change initialPosition from int to double
 		double[] initialPositionDouble = new double[initialPosition.length];
 		for(int i=0; i<initialPosition.length; i++) {
-			initialPositionDouble[i] = initialPosition[i];
+			initialPositionDouble[i] = initialPosition[i] + 0.5;
 		}
 		Vector3d position = new Vector3d(initialPositionDouble);
 		Unit unit = new Unit(name, position, weight, agility, strength, toughness);
@@ -169,8 +169,7 @@ public class Facade implements IFacade {
 	 */
 	@Override
 	public void advanceTime(Unit unit, double dt) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		unit.advanceTime(dt);
 	}
 
 	/* (non-Javadoc)
@@ -178,9 +177,10 @@ public class Facade implements IFacade {
 	 */
 	@Override
 	public void moveToAdjacent(Unit unit, int dx, int dy, int dz) throws ModelException {
-		double[] vector = {dx, dy, dz};
+		double[] vector = {unit.getCubePosition()[0] + dx +0.5,
+				unit.getCubePosition()[1] + dy+0.5,unit.getCubePosition()[2] + dz+0.5};
 		Vector3d adjacentVector = new Vector3d(vector);
-		unit.moveToAdjacent(adjacentVector);	
+		unit.moveTo(adjacentVector);	
 	}
 
 	/* (non-Javadoc)
@@ -239,8 +239,9 @@ public class Facade implements IFacade {
 	 */
 	@Override
 	public void moveTo(Unit unit, int[] cube) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		Vector3d destination = new Vector3d();
+		destination.set(cube[0]+0.5,cube[1]+0.5, cube[2]+0.5);
+		unit.moveTo(destination);
 	}
 
 	/* (non-Javadoc)

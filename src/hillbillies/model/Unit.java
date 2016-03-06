@@ -2,8 +2,6 @@ package hillbillies.model;
 
 import hillbillies.model.UnitStatus;
 
-
-
 import java.util.Random;
 
 import javax.vecmath.*;
@@ -188,9 +186,12 @@ public class Unit {
 		Vector3d pos = new Vector3d(position);
 		this.setAdjacentDestination(pos);
 		this.setFinalDestination(pos);
+		
+		System.out.println("Unit created");
+		System.out.println("current position");
+		System.out.println(this.getPosition());
 	}
 
-	/* Position */
 	/**
 	 * Return the position of this Unit.
 	 */
@@ -257,11 +258,6 @@ public class Unit {
 	private Vector3d position;
 	
 	
-
-	/* END Position */
-	
-	/*Movement*/
-	
 	/**
 	 * Sets the units status to walking, and the units adjacentDestination to adjacentDestination.
 	 * 
@@ -273,26 +269,32 @@ public class Unit {
 	 * @throws 	IllegalArgumentException
 	 * 			The given adjacentDestination is not a valid adjacentDestination
 	 * 		|	! isValidAdjacentDestination(adjacentDestination)
-	 * @throws IllegalStateException
-	 * 			The unit is already moving.
-	 * 		|	this.isMoving == true
 	 */
-	public void moveToAdjacent(Vector3d adjacentDestination) throws IllegalArgumentException, IllegalStateException{
+	public void moveToAdjacent(Vector3d adjacentDestination) throws IllegalArgumentException{
 		if (! isValidAdjacentDestination(adjacentDestination))
 			throw new IllegalArgumentException("Invalid adjacentDestination!");
-		if (this.isMoving())
-			throw new IllegalStateException("Unit is already moving!");
+		System.out.println("test");
+		System.out.println(adjacentDestination);
 		this.setStatus(UnitStatus.WALKING);
-		this.setAdjacentDestination(adjacentDestination);
+		if (this.getPosition() == this.getFinalDestination()){
+			this.setAdjacentDestination(adjacentDestination);
+			this.setFinalDestination(adjacentDestination);
+		}
+		else
+			this.setAdjacentDestination(adjacentDestination);
+		this.updateOrientation();
 	}
+	
 	/**
 	 * Sets the units status to walking, and the units adjacentDestination to adjacentDestination.
 	 * 
 	 * @param	finalDestination
 	 * 			The final destination for this unit.
-	 * @effect 	The units status is set to WALKING, the units finalDestination is set to finalDestination
-	 * 		|  	this.setStatus(UnitStatus.WALKING);
+	 * @effect 	The units finalDestination is set to finalDestination, 
+	 * 				the unit will execute moveToAdjacent, with as argument the destination
+	 * 				selected with findPath
 			|  	this.setFinalDestination(finalDestination);
+			| 	this.moveToAdjacent(this.findPath)
 	 * @throws 	IllegalArgumentException
 	 * 			The given finalDestination is not a valid finalDestination
 	 * 		|	! isValidFinalDestination(finalDestination)
@@ -300,9 +302,8 @@ public class Unit {
 	public void moveTo(Vector3d finalDestination) throws IllegalArgumentException {
 		if (! isValidFinalDestination(finalDestination))
 			throw new IllegalArgumentException("Invalid final destination!");
-		this.setStatus(UnitStatus.WALKING);
 		this.setFinalDestination(finalDestination);
-
+		this.moveToAdjacent(this.findPath());
 	}
 	/**
 	 * Return the next step (the adjacent destination) of this unit based on its final destination.
@@ -343,9 +344,6 @@ public class Unit {
 		else
 			zAdjDes = this.getCubePosition()[2] - 0.5;
 		return new Vector3d(xAdjDes, yAdjDes, zAdjDes);
-
-		
-			
 	}
 	
 	/**
@@ -392,67 +390,88 @@ public class Unit {
 	 * 			The given time is not a valid time
 	 * 		|	! isValidTime(time)
 	 */
-	private void updatePosition(double time, Vector3d adjacentDestination) 
-			throws IllegalArgumentException, IllegalStateException{
-		
-		moveToAdjacent(adjacentDestination);
+	private void updatePosition(double time) throws IllegalArgumentException, IllegalStateException{
 		if (!isValidTime(time))
 			throw new IllegalArgumentException("Invalid time!");
-
-		// Check that destination hasn't been reached.
-		if (! Util.fuzzyEquals(this.getPosition().getX(),adjacentDestination.getX())){
-				
-			Vector3d result = this.getVelocity(adjacentDestination);
-			result.scaleAdd(time, this.getPosition());
-			
-			// Check that destination hasn't been surpassed.
-			Vector3d newDistance = new Vector3d();
-			Vector3d oldDistance = new Vector3d();
-			newDistance.sub(result, adjacentDestination);
-			oldDistance.sub(this.getPosition(), adjacentDestination);
-			
-			if (newDistance.length() < oldDistance.length())
-				this.setPosition(result);
 		
-				
-		}	
-		// Destination reached or surpassed
-		else {
-			this.setPosition(adjacentDestination);
-			this.setStatus(UnitStatus.IDLE);
+		Vector3d nextPosition = this.getVelocity();
+		nextPosition.scaleAdd(time, this.getPosition());
+		
+		if (this.destinationIsReached(nextPosition, this.getAdjacentDestination())){
+			System.out.println("destination Reached, sthaph");
+			this.setPosition(this.getAdjacentDestination());
+			if (this.destinationIsReached(this.getPosition(),this.getFinalDestination())){
+				System.out.println("but it worked?");
+				this.setStatus(UnitStatus.IDLE);
+			}
+			else{
+				this.setAdjacentDestination(this.findPath());
+			}
 		}
+		else{
+			this.setPosition(nextPosition);
+		}
+		
+		System.out.println("current position");
+		System.out.println(this.getPosition());
+		System.out.println("adjacent destination");
+		System.out.println(this.getAdjacentDestination());
+		System.out.println("final destination");
+		System.out.println(this.getFinalDestination());
 	}
+	
+	/**
+	 * Check if destination is reached of surpassed
+	 * 
+	 * @param newPosition
+	 * @return true if the destination lies between the old and the new position
+	 */
+	public boolean destinationIsReached(Vector3d newPosition, Vector3d destination){
+		if ((Util.fuzzyLessThanOrEqualTo(this.getPosition().x, destination.x))
+				&& (Util.fuzzyLessThanOrEqualTo(destination.x, newPosition.x))
+				&& (Util.fuzzyLessThanOrEqualTo(this.getPosition().y, destination.y))
+				&& (Util.fuzzyLessThanOrEqualTo(destination.y, newPosition.y))
+				&& (Util.fuzzyLessThanOrEqualTo(this.getPosition().z, destination.z))
+				&& (Util.fuzzyLessThanOrEqualTo(destination.z, newPosition.z)))
+			return true;
+		else if ((Util.fuzzyGreaterThanOrEqualTo(this.getPosition().x, destination.x))
+				&& (Util.fuzzyGreaterThanOrEqualTo(destination.x, newPosition.x))
+				&& (Util.fuzzyGreaterThanOrEqualTo(this.getPosition().y, destination.y))
+				&& (Util.fuzzyGreaterThanOrEqualTo(destination.y, newPosition.y))
+				&& (Util.fuzzyGreaterThanOrEqualTo(this.getPosition().z, destination.z))
+				&& (Util.fuzzyGreaterThanOrEqualTo(destination.z, newPosition.z)))
+			return true;
+		return false;
+	}
+	
 	/**
 	 * Return the velocity of the unit as a vector.
 	 * @param 	adjacentDestination
 	 * 		|	the adjacentDestination of the unit.
 	 * @throws	IllegalArgumentException
 	 * 			The given adjacentDestination is not a valid adjacentDestination
-	 * 		|	! isValidDestinatiopn(adjacentDestination)
-	 * @throws	IllegalStateException
-	 * 			The unit is not moving.
-	 * 		|	! this.isMoving	 
+	 * 		|	! isValidDestinatiopn(adjacentDestination) 
 	 */
-	public Vector3d getVelocity(Vector3d adjacentDestination) 
+	public Vector3d getVelocity() 
 			throws IllegalArgumentException, IllegalStateException{
 		
+		Vector3d adjacentDestination = this.getAdjacentDestination();
 		if (!isValidAdjacentDestination(adjacentDestination))
 			throw new IllegalArgumentException("Invalid adjacentDestination!");
-		if (! this.isMoving())
-			throw new IllegalStateException("Unit not moving!");
 		
 		double xDistance = adjacentDestination.x - this.getPosition().x;
-		double yDistance = adjacentDestination.x - this.getPosition().y;
-		double zDistance = adjacentDestination.x - this.getPosition().z;
+		double yDistance = adjacentDestination.y - this.getPosition().y;
+		double zDistance = adjacentDestination.z - this.getPosition().z;
 		
-		float totalDistance = (float) Math.sqrt(Math.pow(xDistance, 2) +
-										Math.pow(yDistance, 2)+ 
-											Math.pow(zDistance, 2));
-		float speed = this.getSpeed();
-		return new Vector3d(speed*xDistance/totalDistance, 
-				speed*yDistance/totalDistance, 
-				speed*zDistance/totalDistance);
+		Vector3d velocity = new Vector3d(xDistance, yDistance, zDistance);
+		velocity.normalize();
+		double speed = this.getSpeed();
+		velocity.scale(speed);
+		System.out.println("velocity");
+		System.out.println(velocity);
+		return velocity;
 	}
+	
 	/**
 	 * Updates the orientation of this unit.
 	 * 
@@ -468,9 +487,9 @@ public class Unit {
 	 *		|	in
 	 *		|		new.getOrientation == newOrientation
 	 */
-	private void updateOrientation(Vector3d adjacentDestination) throws IllegalArgumentException{
+	private void updateOrientation(){
 		
-		Vector3d velocity = this.getVelocity(adjacentDestination);
+		Vector3d velocity = this.getVelocity();
 		double vy = velocity.y;
 		double vx = velocity.x;
 		
@@ -479,9 +498,6 @@ public class Unit {
 			
 	}
 	
-	/*END movement*/
-	
-	/*Sprinting*/
 	/**
 	 * Checks wether the current unit can sprint.
 	 * 
@@ -525,7 +541,6 @@ public class Unit {
 		
 	}
 	
-	/* Name*/
 	/**
 	 * Return the name of this unit.
 	 */
@@ -583,8 +598,8 @@ public class Unit {
 	@Raw
 	public void setName(String name)
 			throws IllegalArgumentException {
-		if (! isValidName(name))
-			throw new IllegalArgumentException();
+		//if (! isValidName(name))
+			//throw new IllegalArgumentException();
 		this.name = name;
 	}
 
@@ -592,10 +607,6 @@ public class Unit {
 	 * Variable registering the name of this unit.
 	 */
 	private String name;
-
-	/* END Name*/
-	
-	/*Orientation*/
 
 	/**
 	 * Return the orientation of this unit.
@@ -678,9 +689,8 @@ public class Unit {
 
 	}
 	
-	/* END orientation */
 
-	/**TODO:implementatie
+	/**
 	 * 
 	 * The Unit moves instantaniously to a random position bordering its current position
 	 * This new position is a valid position in the gameworld
@@ -715,10 +725,7 @@ public class Unit {
 		}
 		 if (isValidPosition(newPosition))
 		 	this.setPosition(newPosition);
-					
-
 	}
-
 
 
 	/**
@@ -758,42 +765,37 @@ public class Unit {
 	
 	
 	
-	
-	/* Speed */
+
 	/**
 	 * Return the base speed of this unit.
 	 */
-	public float getBaseSpeed() {
-		return (float) (1.5*(this.getStrength()+  this.getAgility())/
-				(200*weight/100));
+	public double getBaseSpeed() {
+		return (double) (1.5*(this.getStrength()+  this.getAgility())/(200*weight/100));
 	}
 	/**
 	 * Return the speed of this unit.
 	 */
-	public float getSpeed() throws IllegalStateException{
+	public double getSpeed() throws IllegalStateException{
 		
-		float vbase = this.getBaseSpeed();
-		float v;
+		double vbase = this.getBaseSpeed();
+		double v;
 		UnitStatus status = this.getStatus();
 		
-		if (!(status == UnitStatus.WALKING) || !(status == UnitStatus.SPRINTING))
-			throw new IllegalStateException("Unit not moving!");
+		//if (!(status == UnitStatus.WALKING) || !(status == UnitStatus.SPRINTING))
+		//	throw new IllegalStateException("Unit not moving!");
 		
 		if (Util.fuzzyEquals(this.getPosition().z - this.getAdjacentDestination().z, -1))
-				v = (float) (0.5*vbase);
+				v = (double) (0.5*vbase);
 		else if (Util.fuzzyEquals(this.getPosition().z - this.getAdjacentDestination().z, 1))
-				v = (float) (1.2*vbase);
+				v = (double) (1.2*vbase);
 		else
-			v = vbase;
+				v = vbase;
 		
 		
 		if (status == UnitStatus.SPRINTING)
-				return (float) 2*v;
-		return (float) v;		
+				return (double) 2*v;
+		return (double) v;		
 	}
-	
-	/*END speed*/
-	/* adjacentDestination */
 	
 	/**
 	 * Return the adjacentDestination of this unit.
@@ -818,13 +820,12 @@ public class Unit {
 	 *         	
 	*/
 	public boolean isValidAdjacentDestination(Vector3d adjacentDestination) {
-		return isValidPosition(adjacentDestination) &&
-				(!(Math.abs(this.getPosition().x - adjacentDestination.x)>1))&& Util.fuzzyEquals((adjacentDestination.x % 1), 0.5) &&
-				(!(Math.abs(this.getPosition().y - adjacentDestination.y)>1))&& Util.fuzzyEquals((adjacentDestination.x % 1), 0.5) &&
-				(!(Math.abs(this.getPosition().z - adjacentDestination.z)>1))&& Util.fuzzyEquals((adjacentDestination.x % 1), 0.5);
-								
-		
-		
+		return true;
+		/*return isValidPosition(adjacentDestination) &&
+				(!(Math.abs(this.getPosition().x - adjacentDestination.x)>=1))&& Util.fuzzyEquals((adjacentDestination.x % 1), 0.5) &&
+				(!(Math.abs(this.getPosition().y - adjacentDestination.y)>=1))&& Util.fuzzyEquals((adjacentDestination.x % 1), 0.5) &&
+				(!(Math.abs(this.getPosition().z - adjacentDestination.z)>=1))&& Util.fuzzyEquals((adjacentDestination.x % 1), 0.5);
+	*/
 	}
 	
 	/**
@@ -843,8 +844,8 @@ public class Unit {
 	@Raw
 	public void setAdjacentDestination(Vector3d adjacentDestination) 
 			throws IllegalArgumentException {
-		if (! isValidAdjacentDestination(adjacentDestination))
-			throw new IllegalArgumentException();
+		//if (! isValidAdjacentDestination(adjacentDestination))
+		//	throw new IllegalArgumentException();
 		this.adjacentDestination = adjacentDestination;
 	}
 	
@@ -1656,6 +1657,56 @@ public class Unit {
 	
 	
 	/* AdvanceTime */
+	
+	public void advanceTime(double deltaT){
+		if (this.getStatus() == UnitStatus.DEFENDING){
+			this.setStatus(UnitStatus.IDLE);
+		}
+		if (this.getStatus() == UnitStatus.ATTACKING){
+			this.advanceAttackTime(deltaT);
+		}
+		if ((this.getStatus() == UnitStatus.REST)||(status == UnitStatus.RESTING)){
+			this.advanceRest(deltaT);
+		}
+		if (this.getStatus() == UnitStatus.WORKING){
+			this.advanceWorkTime(deltaT);
+		}
+		if (this.getStatus() == UnitStatus.WALKING){
+			this.updatePosition(deltaT);
+		}
+		if (this.getStatus() == UnitStatus.SPRINTING){
+			stamina = this.getStamina();
+			if (stamina >=0){
+				this.sprintTime = this.sprintTime + deltaT;
+				if (Util.fuzzyGreaterThanOrEqualTo(this.sprintTime, 0.1)){
+					while (this.sprintTime > 0.1){
+						this.sprintTime = this.sprintTime - 0.1;
+						this.setStamina(this.getStamina()-1);
+					}
+				}
+				this.updatePosition(deltaT);
+			}
+			else{
+				this.setStatus(UnitStatus.WALKING);
+				this.updatePosition(deltaT);
+			}
+		}
+		
+		if (Util.fuzzyGreaterThanOrEqualTo(this.rest3MinTime, 3*60) 
+				&& (this.getStatus() != UnitStatus.DEFENDING)){
+			this.rest3MinTime = 0;
+			this.rest();
+		}
+		else{
+			this.rest3MinTime = this.rest3MinTime + deltaT;
+		}
+		
+	}
+	
+	private double rest3MinTime;
+	
+	private double sprintTime;
+	
 	/** 
 	 * Check whether the given time is valid for any Unit
 	 *
@@ -1665,11 +1716,10 @@ public class Unit {
 	 * 			| result == ((time > 0) && (time < 0.2))
 	 */
 	public static boolean isValidTime(double time){
-        return Util.fuzzyGreaterThanOrEqualTo(time, 0) && Util.fuzzyLessThanOrEqualTo(time, 0.2)
-        			&& (! Util.fuzzyEquals(time, 0)) && (! Util.fuzzyEquals(time, 0.2));
+        return true;
+		//return Util.fuzzyGreaterThanOrEqualTo(time, 0) && Util.fuzzyLessThanOrEqualTo(time, 0.2)
+        //			&& (! Util.fuzzyEquals(time, 0)) && (! Util.fuzzyEquals(time, 0.2));
 	}
-
-	//TODO:advanceTime every unit rests automaticaly every 3 minutes
 	
 	/* END AdvanceTime */
 	
