@@ -625,8 +625,28 @@ public class Unit {
 	 *
 	 */
 	public void dodge() throws IllegalStateException {
-		if (!(this.getStatus() == UnitStatus.DEFENDING)
-				throw new IllegalStateException("Unit is not being attacked!")
+		
+		if (!(this.getStatus() == UnitStatus.DEFENDING))
+				throw new IllegalStateException("Unit is not being attacked!");
+		
+		Vector3d newPosition = new Vector3d(-1,-1,-1);
+		int counter = 0;
+		
+		double thisX = this.getPosition().x;
+		double thisY = this.getPosition().y;
+		double thisZ = this.getPosition().z;
+		
+		while ((! isValidPosition(newPosition) ) && (counter < 10000)) {
+			// Returns a double between -1 and +1
+			double xJump = 2*rnd.nextDouble() - 1;
+			double yJump = 2*rnd.nextDouble() - 1;
+			double zJump = 2*rnd.nextDouble() - 1;
+			
+			newPosition.set(thisX + xJump, thisY + yJump, thisZ + zJump);
+			counter++;
+		}
+		 if (isValidPosition(newPosition))
+		 	this.setPosition(newPosition);
 					
 
 	}
@@ -746,11 +766,7 @@ public class Unit {
 	 *  
 	 * @param  	adjacentDestination
 	 *         	The adjacentDestination to check.
-	 * @return 	If the unit is not moving, true if the adjacentDestination is null
-	 *       | 	if (! this.isMoving())
-	 *       | 		return (adjacentDestination == null)
-	 * 			Otherwise, if the unit is moving, true if the adjacentDestination the centre of a valid neighbouring position.
-	 *       | 	else 
+	 * @return 	True if the adjacentDestination the centre of a valid neighbouring position.
 	 *       |		return 
 	 *       |		(isValidPosition(adjacentDestination) &&
 	 *		 |		(!(Math.abs(this.getPosition().x - adjacentDestination.x)>1)) && ((adjacentDestination.x % 1) == 0.5) &&
@@ -759,8 +775,6 @@ public class Unit {
 	 *         	
 	*/
 	public boolean isValidAdjacentDestination(Vector3d adjacentDestination) {
-		if (!this.isMoving())
-			return adjacentDestination == null;
 		return isValidPosition(adjacentDestination) &&
 				(!(Math.abs(this.getPosition().x - adjacentDestination.x)>1))&& Util.fuzzyEquals((adjacentDestination.x % 1), 0.5) &&
 				(!(Math.abs(this.getPosition().y - adjacentDestination.y)>1))&& Util.fuzzyEquals((adjacentDestination.x % 1), 0.5) &&
