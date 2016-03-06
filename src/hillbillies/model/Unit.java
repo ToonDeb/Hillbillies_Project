@@ -1031,6 +1031,9 @@ public class Unit {
 	 * 			The time to be subtracted from attackcountdown
 	 * @post	The attackCountDown of this Unit is reduced by the amount time
 	 * 			| new.getAttackCountDown() == this.getAttackCountDown() - time
+	 * @post	If the new attackcountdown is zero, the new status is idle
+	 * 			| if (new.getAttackCountDown <= 0)
+	 * 			|	new.getStatus() == UnitSTatus.Idle
 	 * @throws 	IllegalArgumentException
 	 * 			The given time is not a valid time for any Unit.
 	 * 			| ! isValidTime(time)
