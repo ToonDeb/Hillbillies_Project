@@ -70,6 +70,9 @@ import ogp.framework.util.Util;
  * @invar  The adjacentDestination of each unit must be a valid adjacentDestination for any
  *         unit.
  *       | isValidAdjacentDestination(getAdjacentDestination())
+ * @invar  The finalDestination of each unit must be a valid finalDestination for any
+ *         unit.
+ *       | isValidFinalDestination(getFinalDestination())
  *
  * @version 0.1
  */
@@ -163,9 +166,14 @@ public class Unit {
 	 * @effect The adjacentDestination of this new unit is set to
 	 *         the given adjacentDestination.
 	 *       | this.setAdjacentDestination(adjacentDestination)
+	 * @param  finalDestination
+	 *         The finalDestination for this new unit.
+	 * @effect The finalDestination of this new unit is set to
+	 *         the given finalDestination.
+	 *       | this.setFinalDestination(finalDestination)
 	 * xxxxxxxxxxONNODIGxxxxxxxxx
 	 */
-	public Unit(String name, Vector3d position, float orientation, int weight, int strength, int agility, int toughness, Vector3d adjacentDestination)
+	public Unit(String name, Vector3d position, float orientation, int weight, int strength, int agility, int toughness, Vector3d adjacentDestination, Vector3d finalDestination)
 			throws IllegalArgumentException {
 
 		if (! isValidStartAttribute(strength))
@@ -195,6 +203,7 @@ public class Unit {
 
 		this.setStatus(UnitStatus.IDLE);
 		this.setAdjacentDestination(adjacentDestination);
+		this.setFinalDestination(finalDestination);
 	}
 
 	/* Position */
@@ -796,7 +805,7 @@ public class Unit {
 	 *  
 	 * @param  	adjacentDestination
 	 *         	The adjacentDestination to check.
-	 * @return 	True if the adjacentDestination the centre of a valid neighbouring position.
+	 * @return 	True if the adjacentDestination is the centre of a valid neighbouring position.
 	 *       |		return 
 	 *       |		(isValidPosition(adjacentDestination) &&
 	 *		 |		(!(Math.abs(this.getPosition().x - adjacentDestination.x)>1)) && ((adjacentDestination.x % 1) == 0.5) &&
@@ -842,6 +851,57 @@ public class Unit {
 	
 	/*END adjacentDestination*/
 	
+	/* finalDestination */
+	
+	/**
+	 * Return the finalDestination of this unit.
+	 */
+	@Basic @Raw
+	public Vector3d getFinalDestination() {
+		return this.finalDestination;
+	}
+	
+	/**
+	 * Check whether the given finalDestination is a valid finalDestination for
+	 * this unit.
+	 *  
+	 * @param  	finalDestination
+	 *         	The finalDestination to check.
+	 * @return 	True if the finalDestination is a valid position.
+	 *       |		return 
+	 *       |		isValidPosition(finalDestination) 
+	*/
+	public boolean isValidFinalDestination(Vector3d finalDestination) {
+		return isValidPosition(finalDestination);
+	}
+	
+	/**
+	 * Set the finalDestination of this unit to the given finalDestination.
+	 * 
+	 * @param  finalDestination
+	 *         The new finalDestination for this unit.
+	 * @post   The finalDestination of this unit is equal to
+	 *         the given finalDestination.
+	 *       | new.getFinalDestination() == finalDestination
+	 * @throws IllegalArgumentException
+	 *         The given finalDestination is not a valid finalDestination for any
+	 *         unit.
+	 *       | ! isValidFinalDestination(getFinalDestination())
+	 */
+	@Raw
+	public void setFinalDestination(Vector3d finalDestination) 
+			throws IllegalArgumentException {
+		if (! isValidFinalDestination(finalDestination))
+			throw new IllegalArgumentException();
+		this.finalDestination = finalDestination;
+	}
+	
+	/**
+	 * Variable registering the finalDestination of this unit.
+	 */
+	private Vector3d finalDestination = null;
+	
+	/*END finalDestination*/
 	/* Weight */
 	/**
 	 * Return the weight of this Unit.
