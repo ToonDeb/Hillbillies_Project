@@ -2,6 +2,9 @@ package hillbillies.model;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+
+import ogp.framework.util.Util;
+
 import org.junit.Before;
 import javax.vecmath.*;
 
@@ -144,8 +147,8 @@ public class UnitTest {
 	
 	@Test
 	public void testGetSetName$LegalCase(){
-		testingUnit.setName("Hillbilly");
-		assertEquals(testingUnit.getName(), "Hillbilly");
+		testingUnit.setName("GLaDOS");
+		assertEquals(testingUnit.getName(), "GLaDOS");
 	}
 	
 	@Test (expected = IllegalArgumentException.class)
@@ -156,7 +159,7 @@ public class UnitTest {
 	
 	@Test (expected = IllegalArgumentException.class)
 	public void testSetName$IllegalCharCase(){
-		testingUnit.setName("De$sdfgs");
+		testingUnit.setName("De$ta");
 		fail("Exception Expected!");
 	}
 	
@@ -174,6 +177,51 @@ public class UnitTest {
 	
 	// setName uses the same tests as isValidName, because it
 	// calls the method to throw the exception
+	
+	@Test
+	public void testGetSetOrientation(){
+		testingUnit.setOrientation((float)2.54);
+		assertTrue(Util.fuzzyEquals(testingUnit.getOrientation(), (float) 2.54));
+	}
+	
+	@Test
+	public void testGetSetOrientation$WrongNumer(){
+		testingUnit.setOrientation((float) -Math.PI);
+		assertTrue(Util.fuzzyEquals(testingUnit.getOrientation(), (float) Math.PI));
+	}
+	
+	@Test
+	public void testFace(){
+		testingUnit.face(otherUnit);
+		otherUnit.face(testingUnit);
+		assertTrue(Util.fuzzyEquals(testingUnit.getOrientation(), - otherUnit.getOrientation()));
+	}
+	
+	@Test
+	public void testCanAttack$TrueXCase(){
+		otherUnit.setPosition(new Vector3d(26d,25d,25d));
+		testingUnit.setPosition(new Vector3d(25d,25d,25d));
+		assertTrue(testingUnit.canAttack(otherUnit));
+		assertTrue(otherUnit.canAttack(testingUnit));
+	}
+	
+	@Test
+	public void testCanAttack$TrueYCase(){
+		otherUnit.setPosition(new Vector3d(25d,26d,25d));
+		testingUnit.setPosition(new Vector3d(25d,25d,25d));
+		assertTrue(testingUnit.canAttack(otherUnit));
+		assertTrue(otherUnit.canAttack(testingUnit));
+	}
+	
+	@Test
+	public void testCanAttack$FalceCase(){
+		otherUnit.setPosition(new Vector3d(9d,1d,25d));
+		testingUnit.setPosition(new Vector3d(25d,25d,25d));
+		assertFalse(testingUnit.canAttack(otherUnit));
+		assertFalse(otherUnit.canAttack(testingUnit));
+	}
+	
+	
 	
 	@Test
 	public void testGetWeight(){
