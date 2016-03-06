@@ -446,4 +446,62 @@ public class UnitTest {
 		fail("Exception Expected");
 	}
 	
+	@Test
+	public void testRest$ValidCase(){
+		testingUnit.rest();
+		assertTrue(testingUnit.getStatus() == UnitStatus.REST);
+	}
+	
+	@Test (expected = IllegalArgumentException.class)
+	public void testRest$InvalidCase(){
+		otherUnit.setPosition(new Vector3d(26d,25d,25d));
+		testingUnit.setPosition(new Vector3d(25d,25d,25d));
+		testingUnit.attack(otherUnit);
+		testingUnit.rest();
+		fail("Exception Expected");
+	}
+	
+	//getStatus is tested in the previous tests, because it is 
+	// called by the other methods
+	
+	@Test
+	public void testIsValidTime$TrueCase(){
+		assertTrue(Unit.isValidTime(0.1));
+	}
+	
+	@Test
+	public void testIsValidTime$TooHighCase(){
+		assertFalse(Unit.isValidTime(1d));
+	}
+	
+	@Test
+	public void testIsValidTime$TooLowCase(){
+		assertFalse(Unit.isValidTime(-0.1d));
+	}
+	
+	@Test
+	public void testTerminate(){
+		testingUnit.terminate();
+		assertTrue(testingUnit.isTerminated());
+	}
+	
+	@Test
+	public void testIsTerminated(){
+		assertFalse(testingUnit.isTerminated());
+	}
+	
+	@Test
+	public void testStartDefaultBehaviour(){
+		testingUnit.startDefaultBehaviour();
+		assertTrue(testingUnit.getDefaultBoolean());
+	}
+	
+	@Test
+	public void testStopDefaultBehaviour(){
+		testingUnit.startDefaultBehaviour();
+		testingUnit.stopDefaultBehaviour();
+		assertFalse(testingUnit.getDefaultBoolean());
+	}
+	
+	//getDefaultBoolean is tested in the previous tests.
 }

@@ -1135,7 +1135,7 @@ public class Unit {
 	 * 			| (this.getStatus() == UnitStatus.REST) || (this.getStatus() == UnitStatus.RESTING)
 	 * @post	TODO: postcondities
 	 */
-	public void advanceRest(double time){
+	private void advanceRest(double time){
 		assert isValidTime(time);
 		assert (this.getStatus() == UnitStatus.REST) || (this.getStatus() == UnitStatus.RESTING);
 
@@ -1175,7 +1175,7 @@ public class Unit {
 	 * Return the restTime of this Unit.
 	 */
 	@Basic @Raw
-	public double getRestTime() {
+	private double getRestTime() {
 		return this.restTime;
 	}
 
@@ -1188,7 +1188,7 @@ public class Unit {
 	 * @return
 	 *       | result == (restTime >= 0))
 	*/
-	public static boolean isValidRestTime(double restTime) {
+	private static boolean isValidRestTime(double restTime) {
 		return (Util.fuzzyGreaterThanOrEqualTo(restTime, 0));
 	}
 
@@ -1205,7 +1205,7 @@ public class Unit {
 	 *       | new.getRestTime() == restTime
 	 */
 	@Raw
-	public void setRestTime(double restTime) {
+	private void setRestTime(double restTime) {
 		assert isValidRestTime(restTime);
 		this.restTime = restTime;
 	}
@@ -1234,7 +1234,7 @@ public class Unit {
 	 * @return
 	 *       | result == (status != null)
 	*/
-	public static boolean isValidStatus(UnitStatus status) {
+	private static boolean isValidStatus(UnitStatus status) {
 		return (status != null);
 	}
 
@@ -1331,7 +1331,7 @@ public class Unit {
 	 /**TODO defaultdocumentatie
 	  * The Unit is no longer in default behavior mode
 	  * 
-	  * @post	the defaultBoolean is true
+	  * @post	the defaultBoolean is false
 	  * 		| new.getDefaultBoolean == false
 	  */
 	 public void stopDefaultBehaviour(){
@@ -1343,7 +1343,7 @@ public class Unit {
 	  * 
 	  * @throws IllegalStateException
 	  */
-	 public void defaultBehaviour() throws IllegalStateException{
+	 private void defaultBehaviour() throws IllegalStateException{
 		if (! this.getDefaultBoolean())
 			throw new IllegalStateException();
 		 
@@ -1380,7 +1380,7 @@ public class Unit {
 	 * @return 
 	 *       | result == (defaultBoolean == true) || (defaultBoolean == false)
 	*/
-	public static boolean isValidDefaultBoolean(boolean defaultBoolean) {
+	private static boolean isValidDefaultBoolean(boolean defaultBoolean) {
 		return (defaultBoolean == true) || (defaultBoolean == false);
 	}
 	
@@ -1398,7 +1398,7 @@ public class Unit {
 	 *       | ! isValidDefaultBoolean(getDefaultBoolean())
 	 */
 	@Raw
-	public void setDefaultBoolean(boolean defaultBoolean) throws IllegalArgumentException {
+	private void setDefaultBoolean(boolean defaultBoolean) throws IllegalArgumentException {
 		if (! isValidDefaultBoolean(defaultBoolean))
 			throw new IllegalArgumentException();
 		this.defaultBoolean = defaultBoolean;
