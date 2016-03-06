@@ -67,9 +67,9 @@ import ogp.framework.util.Util;
  * @invar  The orientation of each unit must be a valid orientation for any
  *         unit.
  *       | isValidOrientation(getOrientation())
- * @invar  The destination of each unit must be a valid destination for any
+ * @invar  The adjacentDestination of each unit must be a valid adjacentDestination for any
  *         unit.
- *       | isValidDestination(getDestination())
+ *       | isValidAdjacentDestination(getAdjacentDestination())
  *
  * @version 0.1
  */
@@ -158,14 +158,14 @@ public class Unit {
 	 *       | this.setName(name)
 	 * @throws 	IllegalArgumentException
 	 * 	
-	 * @param  destination
-	 *         The destination for this new unit.
-	 * @effect The destination of this new unit is set to
-	 *         the given destination.
-	 *       | this.setDestination(destination)
+	 * @param  adjacentDestination
+	 *         The adjacentDestination for this new unit.
+	 * @effect The adjacentDestination of this new unit is set to
+	 *         the given adjacentDestination.
+	 *       | this.setAdjacentDestination(adjacentDestination)
 	 * xxxxxxxxxxONNODIGxxxxxxxxx
 	 */
-	public Unit(String name, Vector3d position, float orientation, int weight, int strength, int agility, int toughness, Vector3d destination)
+	public Unit(String name, Vector3d position, float orientation, int weight, int strength, int agility, int toughness, Vector3d adjacentDestination)
 			throws IllegalArgumentException {
 
 		if (! isValidStartAttribute(strength))
@@ -194,7 +194,7 @@ public class Unit {
 		this.setName(name);
 
 		this.setStatus(UnitStatus.IDLE);
-		this.setDestination(destination);
+		this.setAdjacentDestination(adjacentDestination);
 	}
 
 	/* Position */
@@ -216,7 +216,7 @@ public class Unit {
 		int []cubePosition = {cubeX, cubeY, cubeZ};
 		return cubePosition;
 	}
-	
+
 	/**
 	 * Check whether the given position is a valid position for
 	 * any Unit.
@@ -270,27 +270,27 @@ public class Unit {
 	/*Movement*/
 	
 	/**
-	 * Sets the units status to walking, and the units destination to destination.
+	 * Sets the units status to walking, and the units adjacentDestination to adjacentDestination.
 	 * 
-	 * @param	destination
+	 * @param	adjacentDestination
 	 * 			The neighbouring destination
-	 * @effect 	The units status is set to WALKING, the units destination is set to destination
+	 * @effect 	The units status is set to WALKING, the units adjacentDestination is set to adjacentDestination
 	 * 		|  	this.setStatus(UnitStatus.WALKING);
-			|  	this.setDestination(destination);
+			|  	this.setAdjacentDestination(adjacentDestination);
 	 * @throws 	IllegalArgumentException
-	 * 			The given destination is not a valid destination
-	 * 		|	! isValidDestination(destination)
+	 * 			The given adjacentDestination is not a valid adjacentDestination
+	 * 		|	! isValidAdjacentDestination(adjacentDestination)
 	 * @throws IllegalStateException
 	 * 			The unit is already moving.
 	 * 		|	this.isMoving == true
 	 */
-	public void moveToAdjacent(Vector3d destination) throws IllegalArgumentException, IllegalStateException{
-		if (! isValidDestination(destination))
-			throw new IllegalArgumentException("Invalid destination!");
+	public void moveToAdjacent(Vector3d adjacentDestination) throws IllegalArgumentException, IllegalStateException{
+		if (! isValidAdjacentDestination(adjacentDestination))
+			throw new IllegalArgumentException("Invalid adjacentDestination!");
 		if (this.isMoving())
 			throw new IllegalStateException("Unit is already moving!");
 		this.setStatus(UnitStatus.WALKING);
-		this.setDestination(destination);
+		this.setAdjacentDestination(adjacentDestination);
 			
 	}
 	
@@ -307,15 +307,15 @@ public class Unit {
 	 * Updates the position of the unit.
 	 * @param 	time
 	 * 			The time elapsed.
-	 * @param 	destination
-	 * 			The destination of the unit.
-	 * @post	The new position of this unit is where the unit would be if it went at its speed, towards the given destination, 
+	 * @param 	adjacentDestination
+	 * 			The adjacentDestination of the unit.
+	 * @post	The new position of this unit is where the unit would be if it went at its speed, towards the given adjacentDestination, 
 	 * 				during the given time.
 	 * 
 	 * 		|	let 
-	 * 		|		xDistance = destination.x - this.getPosition().x,
-	 * 		|		yDistance = destination.x - this.getPosition().y,
-	 *		|		zDistance = destination.x - this.getPosition().z,
+	 * 		|		xDistance = adjacentDestination.x - this.getPosition().x,
+	 * 		|		yDistance = adjacentDestination.x - this.getPosition().y,
+	 *		|		zDistance = adjacentDestination.x - this.getPosition().z,
 	 *		|		totalDistance =  Math.sqrt(Math.pow(xDistance, 2) +
 	 *		|							Math.pow(yDistance, 2)+ 
 	 *		|								Math.pow(zDistance, 2)),
@@ -333,40 +333,40 @@ public class Unit {
 	 * 
 	 * 
 	 */
-	public void updatePosition(double time, Vector3d destination) 
+	public void updatePosition(double time, Vector3d adjacentDestination) 
 			throws IllegalArgumentException, IllegalStateException{
 		
-		moveToAdjacent(destination);
+		moveToAdjacent(adjacentDestination);
 		if (!isValidTime(time))
 			throw new IllegalArgumentException("Invalid time!");
 		
-		Vector3d result = this.getVelocity(destination);
+		Vector3d result = this.getVelocity(adjacentDestination);
 		result.scaleAdd(time, this.getPosition());
 		this.setPosition(result);
 		
 	}
 	/**
 	 * Return the velocity of the unit as a vector.
-	 * @param 	destination
-	 * 		|	the destination of the unit.
+	 * @param 	adjacentDestination
+	 * 		|	the adjacentDestination of the unit.
 	 * @throws	IllegalArgumentException
-	 * 			The given destination is not a valid destination
-	 * 		|	! isValidDestinatiopn(destination)
+	 * 			The given adjacentDestination is not a valid adjacentDestination
+	 * 		|	! isValidDestinatiopn(adjacentDestination)
 	 * @throws	IllegalStateException
 	 * 			The unit is not moving.
 	 * 		|	! this.isMoving	 
 	 */
-	public Vector3d getVelocity(Vector3d destination) 
+	public Vector3d getVelocity(Vector3d adjacentDestination) 
 			throws IllegalArgumentException, IllegalStateException{
 		
-		if (!isValidDestination(destination))
-			throw new IllegalArgumentException("Invalid destination!");
+		if (!isValidAdjacentDestination(adjacentDestination))
+			throw new IllegalArgumentException("Invalid adjacentDestination!");
 		if (! this.isMoving())
 			throw new IllegalStateException("Unit not moving!");
 		
-		double xDistance = destination.x - this.getPosition().x;
-		double yDistance = destination.x - this.getPosition().y;
-		double zDistance = destination.x - this.getPosition().z;
+		double xDistance = adjacentDestination.x - this.getPosition().x;
+		double yDistance = adjacentDestination.x - this.getPosition().y;
+		double zDistance = adjacentDestination.x - this.getPosition().z;
 		
 		float totalDistance = (float) Math.sqrt(Math.pow(xDistance, 2) +
 										Math.pow(yDistance, 2)+ 
@@ -379,27 +379,34 @@ public class Unit {
 	/**
 	 * Updates the orientation of this unit.
 	 * 
-	 * @param destination
-	 * 			The destination of this unit.
+	 * @param adjacentDestination
+	 * 			The adjacentDestination of this unit.
 	 * @post The new orientation of this unit is towards the direction of its velocity, 
 	 *			 projected in the xy-plane.
 	 *		|	let
 	 *		|		
-	 *		|		velocity = this.getVelocity(destination)
+	 *		|		velocity = this.getVelocity(adjacentDestination)
 	 *		|		vy = velocity.y, vx = velocity.x,
 	 *		|		newOrientation = Math.atan2(vy, vx)
 	 *		|	in
 	 *		|		new.getOrientation == newOrientation
 	 */
-	public void updateOrientation(Vector3d destination) throws IllegalArgumentException{
+	public void updateOrientation(Vector3d adjacentDestination) throws IllegalArgumentException{
 		
-		Vector3d velocity = this.getVelocity(destination);
+		Vector3d velocity = this.getVelocity(adjacentDestination);
 		double vy = velocity.y;
 		double vx = velocity.x;
 		
 		float newOrientation = (float) Math.atan2(vy, vx);
 		this.setOrientation(newOrientation);
 			
+	}
+	/**
+	 * Return the movestatus, walking or sprinting, if the unit is moving. Return 
+	 * @return
+	 */
+	public boolean getMoveStatus() {
+		
 	}
 	
 	/*END movement*/
@@ -606,14 +613,21 @@ public class Unit {
 	/* END orientation */
 
 	/**TODO:implementatie
+	 * 
 	 * The Unit moves instantaniously to a random position bordering its current position
 	 * This new position is a valid position in the gameworld
 	 *
-	 * @post	the Unit is in a valid position
-	 * 			| new.getPosition() == ...
+	 * 
+	 * @post	The unit is in a position bordering its current position.
+	 * @throws 	IllegalStateException
+	 * 			The unit is not being attacked.
+	 * 
 	 *
 	 */
-	public void dodge() {
+	public void dodge() throws IllegalStateException {
+		if (!(this.getStatus() == UnitStatus.DEFENDING)
+				throw new IllegalStateException("Unit is not being attacked!")
+					
 
 	}
 
@@ -702,9 +716,9 @@ public class Unit {
 		if (!(status == UnitStatus.WALKING) || !(status == UnitStatus.SPRINTING))
 			throw new IllegalStateException("Unit not moving!");
 		
-		if (Util.fuzzyEquals(this.getPosition().z - this.getDestination().z, -1))
+		if (Util.fuzzyEquals(this.getPosition().z - this.getAdjacentDestination().z, -1))
 				v = (float) (0.5*vbase);
-		else if (Util.fuzzyEquals(this.getPosition().z - this.getDestination().z, 1))
+		else if (Util.fuzzyEquals(this.getPosition().z - this.getAdjacentDestination().z, 1))
 				v = (float) (1.2*vbase);
 		else
 			v = vbase;
@@ -716,62 +730,73 @@ public class Unit {
 	}
 	
 	/*END speed*/
-	/* destination */
+	/* adjacentDestination */
 	
 	/**
-	 * Return the destination of this unit.
+	 * Return the adjacentDestination of this unit.
 	 */
 	@Basic @Raw
-	public Vector3d getDestination() {
-		return this.destination;
+	public Vector3d getAdjacentDestination() {
+		return this.adjacentDestination;
 	}
 	
 	/**
-	 * Check whether the given destination is a valid destination for
+	 * Check whether the given adjacentDestination is a valid adjacentDestination for
 	 * this unit.
 	 *  
-	 * @param  destination
-	 *         The destination to check.
-	 * @return If the unit is walking, true if the destination is a valid position.
-	 *       | if (this.getStatus == WALKING)
-	 *       | 		then return isValidPosition(destination)
-	 *         If the unit is not walking, true if the destination is null
-	 *       | else
-	 *       | 		return (destination == null)
+	 * @param  	adjacentDestination
+	 *         	The adjacentDestination to check.
+	 * @return 	If the unit is not moving, true if the adjacentDestination is null
+	 *       | 	if (! this.isMoving())
+	 *       | 		return (adjacentDestination == null)
+	 * 			Otherwise, if the unit is moving, true if the adjacentDestination the centre of a valid neighbouring position.
+	 *       | 	else 
+	 *       |		return 
+	 *       |		(isValidPosition(adjacentDestination) &&
+	 *		 |		(!(Math.abs(this.getPosition().x - adjacentDestination.x)>1)) && ((adjacentDestination.x % 1) == 0.5) &&
+	 *		 |		(!(Math.abs(this.getPosition().y - adjacentDestination.y)>1)) && ((adjacentDestination.x % 1) == 0.5) &&
+	 *		 |		(!(Math.abs(this.getPosition().z - adjacentDestination.z)>1)) && ((adjacentDestination.x % 1) == 0.5)
+	 *         	
 	*/
-	public boolean isValidDestination(Vector3d destination) {
-		if (this.isMoving())
-			return isValidPosition(destination);
-		return destination == null;
+	public boolean isValidAdjacentDestination(Vector3d adjacentDestination) {
+		if (!this.isMoving())
+			return adjacentDestination == null;
+		return isValidPosition(adjacentDestination) &&
+				(!(Math.abs(this.getPosition().x - adjacentDestination.x)>1))&& Util.fuzzyEquals((adjacentDestination.x % 1), 0.5) &&
+				(!(Math.abs(this.getPosition().y - adjacentDestination.y)>1))&& Util.fuzzyEquals((adjacentDestination.x % 1), 0.5) &&
+				(!(Math.abs(this.getPosition().z - adjacentDestination.z)>1))&& Util.fuzzyEquals((adjacentDestination.x % 1), 0.5);
+								
+		
+		
 	}
 	
 	/**
-	 * Set the destination of this unit to the given destination.
+	 * Set the adjacentDestination of this unit to the given adjacentDestination.
 	 * 
-	 * @param  destination
-	 *         The new destination for this unit.
-	 * @post   The destination of this new unit is equal to
-	 *         the given destination.
-	 *       | new.getDestination() == destination
+	 * @param  adjacentDestination
+	 *         The new adjacentDestination for this unit.
+	 * @post   The adjacentDestination of this new unit is equal to
+	 *         the given adjacentDestination.
+	 *       | new.getAdjacentDestination() == adjacentDestination
 	 * @throws IllegalArgumentException
-	 *         The given destination is not a valid destination for any
+	 *         The given adjacentDestination is not a valid adjacentDestination for any
 	 *         unit.
-	 *       | ! isValidDestination(getDestination())
+	 *       | ! isValidAdjacentDestination(getAdjacentDestination())
 	 */
 	@Raw
-	public void setDestination(Vector3d destination) 
+	public void setAdjacentDestination(Vector3d adjacentDestination) 
 			throws IllegalArgumentException {
-		if (! isValidDestination(destination))
+		if (! isValidAdjacentDestination(adjacentDestination))
 			throw new IllegalArgumentException();
-		this.destination = destination;
+		this.adjacentDestination = adjacentDestination;
 	}
 	
 	/**
-	 * Variable registering the destination of this unit.
+	 * Variable registering the adjacentDestination of this unit.
 	 */
-	private Vector3d destination = null;
+	private Vector3d adjacentDestination = null;
 	
-	/*END destination*/
+	/*END adjacentDestination*/
 	
 	/* Weight */
 	/**
