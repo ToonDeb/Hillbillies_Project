@@ -397,10 +397,10 @@ public class Unit {
 		Vector3d nextPosition = this.getVelocity();
 		nextPosition.scaleAdd(time, this.getPosition());
 		
-		if (this.destinationIsReached(nextPosition, this.getAdjacentDestination())){
+		if (Unit.destinationIsReached(nextPosition, this.getAdjacentDestination())){
 			System.out.println("destination Reached, sthaph");
 			this.setPosition(this.getAdjacentDestination());
-			if (this.destinationIsReached(this.getPosition(),this.getFinalDestination())){
+			if (Unit.destinationIsReached(this.getPosition(),this.getFinalDestination())){
 				System.out.println("but it worked?");
 				this.setStatus(UnitStatus.IDLE);
 			}
@@ -426,8 +426,8 @@ public class Unit {
 	 * @param newPosition
 	 * @return true if the destination lies between the old and the new position
 	 */
-	public boolean destinationIsReached(Vector3d newPosition, Vector3d destination){
-		if ((Util.fuzzyLessThanOrEqualTo(this.getPosition().x, destination.x))
+	public static boolean destinationIsReached(Vector3d newPosition, Vector3d destination){
+		/*if ((Util.fuzzyLessThanOrEqualTo(this.getPosition().x, destination.x))
 				&& (Util.fuzzyLessThanOrEqualTo(destination.x, newPosition.x))
 				&& (Util.fuzzyLessThanOrEqualTo(this.getPosition().y, destination.y))
 				&& (Util.fuzzyLessThanOrEqualTo(destination.y, newPosition.y))
@@ -440,6 +440,9 @@ public class Unit {
 				&& (Util.fuzzyGreaterThanOrEqualTo(destination.y, newPosition.y))
 				&& (Util.fuzzyGreaterThanOrEqualTo(this.getPosition().z, destination.z))
 				&& (Util.fuzzyGreaterThanOrEqualTo(destination.z, newPosition.z)))
+			return true;
+		*/
+		if (newPosition.epsilonEquals(destination, 1E-2))
 			return true;
 		return false;
 	}
@@ -493,7 +496,7 @@ public class Unit {
 		double vy = velocity.y;
 		double vx = velocity.x;
 		
-		float newOrientation = (float) Math.atan2(vy, vx);
+		double newOrientation = (double) Math.atan2(vy, vx);
 		this.setOrientation(newOrientation);
 			
 	}
@@ -612,7 +615,7 @@ public class Unit {
 	 * Return the orientation of this unit.
 	 */
 	@Basic @Raw
-	public float getOrientation() {
+	public double getOrientation() {
 		return this.orientation;
 	}
 
@@ -651,17 +654,23 @@ public class Unit {
 	 *       |		new.getOrientation() == correspondingOrientation
 	 */
 	@Raw
-	public void setOrientation(float orientation) {
-		if (orientation >= 0)
-			this.orientation = (float) (orientation % 2*Math.PI);
-		else 
-			this.orientation = (float) (2*Math.PI - ( -orientation % 2*Math.PI));
+	public void setOrientation(double orientation) {
+		System.out.println("orientation");
+		System.out.println(orientation);
+		if (orientation >= 0){
+			System.out.println(orientation % 2*Math.PI);
+			this.orientation = (double) (orientation % 2*Math.PI);
+		}
+		else {
+			System.out.println((2*Math.PI - ( -orientation % 2*Math.PI)));
+			this.orientation = (double) (2*Math.PI - ( -orientation % 2*Math.PI));
+	
+		}
 	}
-
 	/**
 	 * Variable registering the orientation of this unit.
 	 */
-	private float orientation = (float) Math.PI/2;
+	private double orientation = (double) Math.PI/2;
 
 
 	/**
@@ -675,7 +684,7 @@ public class Unit {
 	 * 			the given other unit is not in a valid position
 	 * 			| ! this.canAttack(other)
 	 */
-	public void face(Unit other) throws IllegalArgumentException{
+	private void face(Unit other) throws IllegalArgumentException{
 		if (! this.canAttack(other))
 			throw new IllegalArgumentException("the other unit is not on a valid position");
 		double x_this = this.getPosition().x;
@@ -683,7 +692,7 @@ public class Unit {
 		double x_other = other.getPosition().x;
 		double y_other = other.getPosition().y;
 		
-		float this_orientation = (float) Math.atan2(y_other - y_this, x_other - x_this);
+		double this_orientation = (double) Math.atan2(y_other - y_this, x_other - x_this);
 				
 		this.setOrientation(this_orientation);
 
@@ -702,7 +711,7 @@ public class Unit {
 	 * 
 	 *
 	 */
-	public void dodge() throws IllegalStateException {
+	private void dodge() throws IllegalStateException {
 		
 		if (!(this.getStatus() == UnitStatus.DEFENDING))
 				throw new IllegalStateException("Unit is not being attacked!");
@@ -718,9 +727,8 @@ public class Unit {
 			// Returns a double between -1 and +1
 			double xJump = 2*rnd.nextDouble() - 1;
 			double yJump = 2*rnd.nextDouble() - 1;
-			double zJump = 2*rnd.nextDouble() - 1;
 			
-			newPosition.set(thisX + xJump, thisY + yJump, thisZ + zJump);
+			newPosition.set(thisX + xJump, thisY + yJump, thisZ);
 			counter++;
 		}
 		 if (isValidPosition(newPosition))
@@ -1323,10 +1331,9 @@ public class Unit {
 		if (! this.canAttack(other))
 			throw new IllegalArgumentException("The other Unit cannot be attacked");
 		this.setAttackCountDown(1d);
+		this.face(other);
 		this.setStatus(UnitStatus.ATTACKING);
 		other.defend(this);
-		this.face(other);
-
 	}
 
 	/**

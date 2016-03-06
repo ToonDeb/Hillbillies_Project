@@ -191,13 +191,6 @@ public class UnitTest {
 	}
 	
 	@Test
-	public void testFace(){
-		testingUnit.face(otherUnit);
-		otherUnit.face(testingUnit);
-		assertTrue(Util.fuzzyEquals(testingUnit.getOrientation(), - otherUnit.getOrientation()));
-	}
-	
-	@Test
 	public void testCanAttack$TrueXCase(){
 		otherUnit.setPosition(new Vector3d(26d,25d,25d));
 		testingUnit.setPosition(new Vector3d(25d,25d,25d));

@@ -437,13 +437,14 @@ public class Facade implements IFacade {
 	 */
 	@Override
 	public void fight(Unit attacker, Unit defender) throws ModelException {
-		try{
+		attacker.attack(defender);
+		/*try{
 		attacker.attack(defender);
 	} catch (IllegalArgumentException e){
 		throw new ModelException();
 	} catch (IllegalStateException e) {
 		throw new ModelException();
-	}
+	}*/
 	}
 
 	/* (non-Javadoc)
