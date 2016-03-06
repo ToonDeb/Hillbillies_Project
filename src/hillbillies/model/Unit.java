@@ -158,9 +158,9 @@ public class Unit {
 	 * @effect The adjacentDestination of this new unit is set to
 	 *         the given adjacentDestination.
 	 *       | this.setAdjacentDestination(adjacentDestination)
-	 * xxxxxxxxxxONNODIGxxxxxxxxx
+	 * 
 	 */
-	public Unit(String name, Vector3d position, float orientation, int weight, int strength, int agility, int toughness, Vector3d adjacentDestination)
+	public Unit(String name, Vector3d position, int weight, int strength, int agility, int toughness)
 			throws IllegalArgumentException {
 
 		if (! isValidStartAttribute(strength))
@@ -178,14 +178,12 @@ public class Unit {
 		this.setHP(this.getMaxHP());
 		this.setStamina(this.getMaxStamina());
 		this.setPosition(position);
-		if (! isValidOrientation(orientation))
-			orientation = (float) (Math.PI/2);
-		else
-			setOrientation(orientation);
 		this.setName(name);
 
 		this.setStatus(UnitStatus.IDLE);
-		this.setAdjacentDestination(adjacentDestination);
+		
+		Vector3d pos = new Vector3d(position);
+		this.setAdjacentDestination(pos);
 	}
 
 	/* Position */
@@ -243,7 +241,7 @@ public class Unit {
 	 *       | ! isValidPosition(this.getPosition())
 	 */
 	@Raw
-	public void setPosition(Vector3d position) throws IllegalArgumentException {
+	private void setPosition(Vector3d position) throws IllegalArgumentException {
 		if (! isValidPosition(position))
 			throw new IllegalArgumentException("the given position is not a valid position");
 		this.position = position;
@@ -282,10 +280,10 @@ public class Unit {
 			throw new IllegalStateException("Unit is already moving!");
 		this.setStatus(UnitStatus.WALKING);
 		this.setAdjacentDestination(adjacentDestination);
-			
 	}
 	
-	/***
+	/**
+	 * Check if the Unit is moving
 	 * 
 	 * @return 	True if the unit is moving or walking.
 	 * 		|	result == (this.getStatus == UnitStatus.WALKING) || (this.getStatus == UnitStatus.SPRINTING)
@@ -320,11 +318,8 @@ public class Unit {
 	 * @throws	IllegalArgumentException
 	 * 			The given time is not a valid time
 	 * 		|	! isValidTime(time)
-	 * 
-	 * 
-	 * 
 	 */
-	public void updatePosition(double time, Vector3d adjacentDestination) 
+	private void updatePosition(double time, Vector3d adjacentDestination) 
 			throws IllegalArgumentException, IllegalStateException{
 		
 		moveToAdjacent(adjacentDestination);
@@ -334,7 +329,6 @@ public class Unit {
 		Vector3d result = this.getVelocity(adjacentDestination);
 		result.scaleAdd(time, this.getPosition());
 		this.setPosition(result);
-		
 	}
 	/**
 	 * Return the velocity of the unit as a vector.
@@ -382,7 +376,7 @@ public class Unit {
 	 *		|	in
 	 *		|		new.getOrientation == newOrientation
 	 */
-	public void updateOrientation(Vector3d adjacentDestination) throws IllegalArgumentException{
+	private void updateOrientation(Vector3d adjacentDestination) throws IllegalArgumentException{
 		
 		Vector3d velocity = this.getVelocity(adjacentDestination);
 		double vy = velocity.y;
@@ -435,7 +429,7 @@ public class Unit {
 	 */
 	public void stopSprint() {
 		assert this.canSprint();
-		this.setStatus(UnitStatus.IDLE);
+		this.setStatus(UnitStatus.WALKING);
 		
 	}
 	
