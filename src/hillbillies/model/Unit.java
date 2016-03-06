@@ -153,16 +153,6 @@ public class Unit {
 	 *       | this.setName(name)
 	 * @throws 	IllegalArgumentException
 	 * 	
-<<<<<<< HEAD
-	 * @param  destination
-	 *         The destination for this new unit.
-	 * @effect The destination of this new unit is set to
-	 *         the given destination.
-	 *       | this.setDestination(destination)
-	 *
-	 */
-	public Unit(String name, Vector3d position, int weight, int strength, int agility, int toughness)
-=======
 	 * @param  adjacentDestination
 	 *         The adjacentDestination for this new unit.
 	 * @effect The adjacentDestination of this new unit is set to
@@ -171,7 +161,6 @@ public class Unit {
 	 * xxxxxxxxxxONNODIGxxxxxxxxx
 	 */
 	public Unit(String name, Vector3d position, float orientation, int weight, int strength, int agility, int toughness, Vector3d adjacentDestination)
->>>>>>> refs/remotes/origin/master
 			throws IllegalArgumentException {
 
 		if (! isValidStartAttribute(strength))
@@ -196,10 +185,7 @@ public class Unit {
 		this.setName(name);
 
 		this.setStatus(UnitStatus.IDLE);
-<<<<<<< HEAD
-=======
 		this.setAdjacentDestination(adjacentDestination);
->>>>>>> refs/remotes/origin/master
 	}
 
 	/* Position */
@@ -406,13 +392,6 @@ public class Unit {
 		this.setOrientation(newOrientation);
 			
 	}
-	/**
-	 * Return the movestatus, walking or sprinting, if the unit is moving. Return 
-	 * @return
-	 */
-	public boolean getMoveStatus() {
-		
-	}
 	
 	/*END movement*/
 	
@@ -555,39 +534,12 @@ public class Unit {
 		return orientation >= 0 && orientation < 2*Math.PI;
 	}
 
-
-<<<<<<< HEAD
-=======
-	@Basic @Raw
-	public float getOrientation() {
-		return this.orientation;
-	}
-	
-	/**
-	 * Check whether the given orientation is a valid orientation for
-	 * any unit.
-	 *  
-	 * @param  orientation
-	 *         The orientation to check.
-	 * @return 
-	 *		   The orientation of the unit is between 0 and 2*Math.PI 		 	
-	 *       | orientation >= 0 && orientation < 2*Math.PI
-	 *       
-	*/
-	public static boolean isValidOrientation(float orientation) {
-		return orientation >= 0 && orientation < 2*Math.PI;
-	}
-	
->>>>>>> refs/remotes/origin/master
 	/**
 	 * Set the orientation of this unit to the given orientation.
 	 * 
 	 * @param  orientation
 	 *         The new orientation for this unit.
-<<<<<<< HEAD
-	 * @post   The orientation is set to the physically corresponding orientation between 0 and 2*Math.PI
-	 *       | new.getOrientation() == correspondingOrientation
-=======
+
 	 * @post   The orientation is set to the physically corresponding orientation between 0 and 2*Math.PI.
 	 * 		   For positive orientation, this is the remainder of a division by 2*Math.PI.
 	 * 		   For negative orientation, this is 2*Math.PI minus the remainder of a division by
@@ -600,7 +552,6 @@ public class Unit {
 	 *       | 			correspondingOrientation = (2*Math.PI - ( -orientation % 2*Math.PI))
 	 *       | in
 	 *       |		new.getOrientation() == correspondingOrientation
->>>>>>> refs/remotes/origin/master
 	 */
 	@Raw
 	public void setOrientation(float orientation) {
@@ -609,15 +560,6 @@ public class Unit {
 		else 
 			this.orientation = (float) (2*Math.PI - ( -orientation % 2*Math.PI));
 	}
-<<<<<<< HEAD
-=======
-	
-	
-	/**
-	 * Variable registering the orientation of this unit.
-	 */
-	private float orientation;
->>>>>>> refs/remotes/origin/master
 
 	/**
 	 * Variable registering the orientation of this unit.
@@ -1728,15 +1670,8 @@ public class Unit {
 	/**
 	 * Variable registering the defaultBoolean of this Unit.
 	 */
-<<<<<<< HEAD
 
 	private boolean defaultBoolean = false;
 
-=======
-	private boolean defaultBoolean;
-	
-	/* Time */
-	
-	
->>>>>>> refs/remotes/origin/master
+
 }
