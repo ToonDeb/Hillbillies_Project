@@ -293,6 +293,13 @@ public class Unit {
 		this.setAdjacentDestination(adjacentDestination);
 			
 	}
+	/**
+	 * Sets the finalDestination of the unit to finalDestination, 
+	 * @param finalDestination
+	 */
+	public void moveTo(Vector3d finalDestination){
+		
+	}
 	
 	/***
 	 * 
@@ -310,9 +317,9 @@ public class Unit {
 	 * @param 	adjacentDestination
 	 * 			The adjacentDestination of the unit.
 	 * @post	The new position of this unit is where the unit would be if it went at its speed, towards the given adjacentDestination, 
-	 * 				during the given time.
-	 * 
+	 * 				during the given time, if that position doesn't equal or surpass the adjacentDestination.
 	 * 		|	let 
+	 * 		| 		oldPosition = this.getPosition()
 	 * 		|		xDistance = adjacentDestination.x - this.getPosition().x,
 	 * 		|		yDistance = adjacentDestination.x - this.getPosition().y,
 	 *		|		zDistance = adjacentDestination.x - this.getPosition().z,
@@ -324,8 +331,15 @@ public class Unit {
 	 *		|							speed*yDistance/totalDistance, 
 	 *		|							speed*zDistance/totalDistance),
 	 *		|		newPosition = velocity*time + this.getPosition()
+	 *		|		newDistance = (newPosition - adjacentDestination)
+	 *		|		oldDistance = (oldPosition - adjacentDestination)
 	 * 		|	in
-	 * 		|		new.getPosition == newPosition		
+	 * 		|		if (( old.Position != adjacentDestination) && 
+	 * 		|				(! (newDistance).length < (oldDistance).length))
+	 * 		|			new.getPosition == newPosition
+	 * 		|		else
+	 * 		|			new.getPosition == adjacentDestination	
+	 * 
 	 * @throws	IllegalArgumentException
 	 * 			The given time is not a valid time
 	 * 		|	! isValidTime(time)
@@ -339,11 +353,27 @@ public class Unit {
 		moveToAdjacent(adjacentDestination);
 		if (!isValidTime(time))
 			throw new IllegalArgumentException("Invalid time!");
-		
-		Vector3d result = this.getVelocity(adjacentDestination);
-		result.scaleAdd(time, this.getPosition());
-		this.setPosition(result);
-		
+		// Check that destination hasn't been reached.
+		if (! Util.fuzzyEquals(this.getPosition().getX(),adjacentDestination.getX())
+				
+			Vector3d result = this.getVelocity(adjacentDestination);
+			result.scaleAdd(time, this.getPosition());
+			
+			// Check that destination hasn't been surpassed.
+			Vector3d newDistance;
+			Vector3d oldDistance;
+			newDistance.sub(result, adjacentDestination);
+			oldDistance.sub(this.getPosition(), adjacentDestination);
+			
+			if (newDistance.length() < oldDistance.length())
+				this.setPosition(result);
+
+				
+			
+		// Destination reached or surpassed
+		else
+			this.setPosition(adjacentDestination);
+			this.setStatus(UnitStatus.IDLE);
 	}
 	/**
 	 * Return the velocity of the unit as a vector.
