@@ -12,11 +12,7 @@ public class UnitTest {
 	
 	@Before
 	public void setUp(){
-		double[] position;
-		position = new double[3];
-		position[0] = 25d;
-		position[1] = 25d;
-		position[2] = 25d;
+		double[] position = {25d, 25d, 25d};
 		Vector3d pos = new Vector3d(position);
 		testingUnit = new Unit("TestSubject", pos, 50, 50, 50, 50);
 		Vector3d other = new Vector3d(26d,25d,25d);
@@ -25,11 +21,7 @@ public class UnitTest {
 	
 	@Test
 	public void testConstructor$LegalCase(){
-		double[] position;
-		position = new double[3];
-		position[0] = 12d;
-		position[1] = 15d;
-		position[2] = 2d;
+		double[] position = {12d, 15d, 2d};
 		Vector3d pos = new Vector3d(position);
 		Unit unit = new Unit("TestSubject", pos, 50, 50, 50, 50);
 		
@@ -44,24 +36,16 @@ public class UnitTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructor$IllegalPositionCase()
 			throws IllegalArgumentException{
-		double[] position;
-		position = new double[3];
-		position[0] = 51d;
-		position[1] = 51d;
-		position[2] = 51d;
+		double[] position = {51d, 51d, 51d};
 		Vector3d pos = new Vector3d(position);
-		Unit unit = new Unit("TestSubject", pos, 50, 50, 50, 50);
+		new Unit("TestSubject", pos, 50, 50, 50, 50);
 		fail("Exception Expected!");
 	}
 	
 	@Test
 	public void testConstructor$IllegalStrengthCase()
 			throws IllegalArgumentException{
-		double[] position;
-		position = new double[3];
-		position[0] = 40d;
-		position[1] = 40d;
-		position[2] = 40d;
+		double[] position = {40d,40d,40d};
 		Vector3d pos = new Vector3d(position);
 		Unit unit = new Unit("TestSubject", pos, 50, 24, 50, 50);
 		assertEquals(unit.getStrength(), 25);
@@ -70,11 +54,7 @@ public class UnitTest {
 	@Test
 	public void testConstructor$IllegalAgilityCase()
 			throws IllegalArgumentException{
-		double[] position;
-		position = new double[3];
-		position[0] = 40d;
-		position[1] = 40d;
-		position[2] = 40d;
+		double[] position = {40d,40d,40d};
 		Vector3d pos = new Vector3d(position);
 		Unit unit = new Unit("TestSubject", pos, 50, 50, 150, 50);
 		assertEquals(unit.getAgility(), 25);
@@ -83,11 +63,7 @@ public class UnitTest {
 	@Test
 	public void testConstructor$IllegalToughnessCase()
 			throws IllegalArgumentException{
-		double[] position;
-		position = new double[3];
-		position[0] = 40d;
-		position[1] = 40d;
-		position[2] = 40d;
+		double[] position = {40d,40d,40d};
 		Vector3d pos = new Vector3d(position);
 		Unit unit = new Unit("TestSubject", pos, 50, 50, 50, 250);
 		assertEquals(unit.getToughness(), 25);
@@ -95,11 +71,7 @@ public class UnitTest {
 	
 	@Test
 	public void testConstructor$IllegalWeightCase(){
-		double[] position;
-		position = new double[3];
-		position[0] = 40d;
-		position[1] = 40d;
-		position[2] = 40d;
+		double[] position = {40d,40d,40d};
 		Vector3d pos = new Vector3d(position);
 		Unit unit = new Unit("TestSubject", pos, 30, 50, 50, 50);
 		assertEquals(unit.getWeight(), 50);
@@ -108,11 +80,7 @@ public class UnitTest {
 	
 	@Test
 	public void testSetGetPosition$LegalCase(){
-		double[] position;
-		position = new double[3];
-		position[0] = 40.5d;
-		position[1] = 40.75d;
-		position[2] = 40.49d;
+		double[] position = {40.5d,40.75d,40.49d};
 		Vector3d pos = new Vector3d(position);
 		testingUnit.setPosition(pos);
 		assertEquals(testingUnit.getPosition(), position);
@@ -120,11 +88,7 @@ public class UnitTest {
 	
 	@Test
 	public void testGetCubePosition(){
-		double[] position;
-		position = new double[3];
-		position[0] = 40.5d;
-		position[1] = 40.75d;
-		position[2] = 40.49d;
+		double[] position = {40.5d,40.75d,40.49d};
 		Vector3d pos = new Vector3d(position);
 		testingUnit.setPosition(pos);
 		int[] cubePosition = {40,40,40};
@@ -143,11 +107,7 @@ public class UnitTest {
 	@Test (expected = IllegalArgumentException.class)
 	public void testSetPosition$IllegalYCase() throws IllegalArgumentException{
 		
-		double[] position;
-		position = new double[3];
-		position[0] = 40d;
-		position[1] = 100d;
-		position[2] = 40d;
+		double[] position = {40d, 100d, 40d };
 		Vector3d pos = new Vector3d(position);
 		testingUnit.setPosition(pos);
 		fail("Exception Expected!");
@@ -155,11 +115,7 @@ public class UnitTest {
 	
 	@Test (expected = IllegalArgumentException.class)
 	public void testSetPosition$IllegalZCase() throws IllegalArgumentException{
-		double[] position;
-		position = new double[3];
-		position[0] = 40d;
-		position[1] = 40d;
-		position[2] = -10d;
+		double[] position = {40d, 40d, -10d};
 		Vector3d pos = new Vector3d(position);
 		testingUnit.setPosition(pos);
 		fail("Exception Expected!");

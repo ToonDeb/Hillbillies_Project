@@ -439,7 +439,7 @@ public class Unit {
 
 
 
-	/** TODO:canAttack
+	/**
 	 * Check whether this Unit can attack the other Unit
 	 *
 	 * @param 	other
@@ -933,7 +933,7 @@ public class Unit {
 	 * @throws IllegalArgumentException
 	 *         The given workTime is not a valid workTime for any
 	 *         Unit.
-	 *       | ! isValidWorkTime(getWorkTime())
+	 *       | ! isValidWorkTime(worktime)
 	 */
 	@Raw
 	private void setWorkTime(double worktime) throws IllegalArgumentException {
@@ -1064,14 +1064,18 @@ public class Unit {
 
 	Random rnd = new Random();
 	/* Defend */
-	/** TODO:defend expand postcondition
+	/**
 	 * This Unit is attacked by the other Unit, and can take damage because of this
 	 *
 	 * @param 	other
 	 * 			The Unit attacking this Unit.
-	 * @post	If dodging and blocking failed, the hp of this unit is reduced by
-	 * 			strength of the attacker divided by ten
-	 * 			| if (
+	 * @effect	If dodging succeeds, move to a random tile around the unit
+	 * 			| if (this.dodgeChance(other))
+	 * 			| 		this.dodge
+	 * @post	if dodging fails and blocking succeeds, nothing hapens and the method is stopped
+	 * 			| if (! this.dodgeChance(other)) && (! this.blockChance)
+	 * 			| 		new.getHP == this.getHP - other.getStrength/10
+	 * 
 	 * @throws 	IllegalArgumentException
 	 * 			This Unit cannot be attacked by  the other Unit
 	 * 			| ! other.canAttack(this)
@@ -1083,23 +1087,31 @@ public class Unit {
 		this.setStatus(UnitStatus.DEFENDING);
 		this.face(other);
 
-		double dodgeChance = (0.2d* this.getAgility())/other.getAgility();
-
-		if (Util.fuzzyGreaterThanOrEqualTo(rnd.nextDouble(),dodgeChance)){ //nextDouble maakt random getal tussen 0 en 1
+		if (this.dodgeChance(other)){
 			this.dodge();
 			//this.setStatus(UnitStatus.IDLE); //TODO:hier, of in advanceTime?
 			return;
 		}
-		double blockChance = (0.25d* (this.getStrength() + this.getAgility()))
-				/(other.getStrength()+other.getAgility());
-		if (Util.fuzzyGreaterThanOrEqualTo(rnd.nextDouble(),blockChance)){
+		
+		if (this.blockChance(other)){
 			//this.setStatus(UnitStatus.IDLE);
 			return;
 		}
 		int newHP = this.getHP() - other.getStrength()/10;
 		this.setHP(newHP);
-
  	}
+	
+	private boolean dodgeChance(Unit other){
+		double dodgeChance = (0.2d* this.getAgility())/other.getAgility();
+		return (Util.fuzzyLessThanOrEqualTo(rnd.nextDouble(),dodgeChance));
+	}
+	
+	private boolean blockChance(Unit other){
+	double blockChance = (0.25d* (this.getStrength() + this.getAgility()))
+			/(other.getStrength()+other.getAgility());
+	return (Util.fuzzyLessThanOrEqualTo(rnd.nextDouble(),blockChance));
+	
+	}
 	/* END Defend */
 	
 	
