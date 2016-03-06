@@ -137,19 +137,14 @@ public class Unit {
 	 *       | if (isValidStartAttribute(toughness))
 	 *       |   then new.getToughness() == toughness
 	 *       |   else new.getToughness() == 25
-	 * xxxxxxxxxxONNODIGxxxxxxxxx
-	 * @param  stamina
- 	 *         The stamina for this new Unit.
- 	 * @pre    toughness and weight are valid.
-	 * 		 | isValidToughness(toughness) && isValidWeight(weight)
+	 *       
+	 * @post	the orientation of this new Unit is PI/2
+	 * 			| new.getOrientation == PI/2
+	 * 
  	 * @post   The stamina of this new Unit is equal to the given
 	 *         stamina.
 	 *       | new.getStamina() == 200*(weight()/100)*(toughness()/100)
 	 *
-	 * @param  hp
-	 *         The hitpoints for this new Unit.
-	 * @pre    toughness and weight are valid.
-	 * 		 | isValidToughness(toughness) && isValidWeight(weight)
 	 * @post   The hitpoints of this new Unit is equal to the given
 	 *         hitpoints.
 	 *       | new.getHP() == 200*(weight/100)*(toughness/100)
@@ -166,44 +161,33 @@ public class Unit {
 	 * @effect The adjacentDestination of this new unit is set to
 	 *         the given adjacentDestination.
 	 *       | this.setAdjacentDestination(adjacentDestination)
-	 * @param  finalDestination
-	 *         The finalDestination for this new unit.
-	 * @effect The finalDestination of this new unit is set to
-	 *         the given finalDestination.
-	 *       | this.setFinalDestination(finalDestination)
-	 * xxxxxxxxxxONNODIGxxxxxxxxx
+	 * 
 	 */
-	public Unit(String name, Vector3d position, float orientation, int weight, int strength, int agility, int toughness, Vector3d adjacentDestination, Vector3d finalDestination)
+	public Unit(String name, Vector3d position, int weight, int strength, int agility, int toughness)
 			throws IllegalArgumentException {
 
 		if (! isValidStartAttribute(strength))
 			strength = 25;
-		else
-			setStrength(strength);
+		setStrength(strength);
 		if (! isValidStartAttribute(agility))
 			agility = 25;
-		else
-			setAgility(agility);
+		setAgility(agility);
 		if (! isValidStartWeight(weight))
-			weight = 25;
-		else
-			setAgility(weight);
+			weight = (this.getStrength() + this.getAgility())/2;
+		setWeight(weight);
 		if (! isValidStartAttribute(toughness))
 			toughness = 25;
-		else
-			setToughness(toughness);
+		setToughness(toughness);
 		this.setHP(this.getMaxHP());
 		this.setStamina(this.getMaxStamina());
 		this.setPosition(position);
-		if (! isValidOrientation(orientation))
-			orientation = (float) (Math.PI/2);
-		else
-			setOrientation(orientation);
 		this.setName(name);
 
 		this.setStatus(UnitStatus.IDLE);
-		this.setAdjacentDestination(adjacentDestination);
-		this.setFinalDestination(finalDestination);
+		
+		Vector3d pos = new Vector3d(position);
+		this.setAdjacentDestination(pos);
+		this.setFinalDestination(pos);
 	}
 
 	/* Position */
@@ -300,7 +284,6 @@ public class Unit {
 			throw new IllegalStateException("Unit is already moving!");
 		this.setStatus(UnitStatus.WALKING);
 		this.setAdjacentDestination(adjacentDestination);
-			
 	}
 	/**
 	 * Sets the units status to walking, and the units adjacentDestination to adjacentDestination.
@@ -365,7 +348,8 @@ public class Unit {
 			
 	}
 	
-	/***
+	/**
+	 * Check if the Unit is moving
 	 * 
 	 * @return 	True if the unit is moving or walking.
 	 * 		|	result == (this.getStatus == UnitStatus.WALKING) || (this.getStatus == UnitStatus.SPRINTING)
@@ -407,37 +391,36 @@ public class Unit {
 	 * @throws	IllegalArgumentException
 	 * 			The given time is not a valid time
 	 * 		|	! isValidTime(time)
-	 * 
-	 * 
-	 * 
 	 */
-	public void updatePosition(double time, Vector3d adjacentDestination) 
+	private void updatePosition(double time, Vector3d adjacentDestination) 
 			throws IllegalArgumentException, IllegalStateException{
 		
 		moveToAdjacent(adjacentDestination);
 		if (!isValidTime(time))
 			throw new IllegalArgumentException("Invalid time!");
+
 		// Check that destination hasn't been reached.
-		if (! Util.fuzzyEquals(this.getPosition().getX(),adjacentDestination.getX())
+		if (! Util.fuzzyEquals(this.getPosition().getX(),adjacentDestination.getX())){
 				
 			Vector3d result = this.getVelocity(adjacentDestination);
 			result.scaleAdd(time, this.getPosition());
 			
 			// Check that destination hasn't been surpassed.
-			Vector3d newDistance;
-			Vector3d oldDistance;
+			Vector3d newDistance = new Vector3d();
+			Vector3d oldDistance = new Vector3d();
 			newDistance.sub(result, adjacentDestination);
 			oldDistance.sub(this.getPosition(), adjacentDestination);
 			
 			if (newDistance.length() < oldDistance.length())
 				this.setPosition(result);
-
+		
 				
-			
+		}	
 		// Destination reached or surpassed
-		else
+		else {
 			this.setPosition(adjacentDestination);
 			this.setStatus(UnitStatus.IDLE);
+		}
 	}
 	/**
 	 * Return the velocity of the unit as a vector.
@@ -485,7 +468,7 @@ public class Unit {
 	 *		|	in
 	 *		|		new.getOrientation == newOrientation
 	 */
-	public void updateOrientation(Vector3d adjacentDestination) throws IllegalArgumentException{
+	private void updateOrientation(Vector3d adjacentDestination) throws IllegalArgumentException{
 		
 		Vector3d velocity = this.getVelocity(adjacentDestination);
 		double vy = velocity.y;
@@ -494,13 +477,6 @@ public class Unit {
 		float newOrientation = (float) Math.atan2(vy, vx);
 		this.setOrientation(newOrientation);
 			
-	}
-	/**
-	 * Return the movestatus, walking or sprinting, if the unit is moving. Return 
-	 * @return
-	 */
-	public boolean getMoveStatus() {
-		
 	}
 	
 	/*END movement*/
@@ -545,7 +521,7 @@ public class Unit {
 	 */
 	public void stopSprint() {
 		assert this.canSprint();
-		this.setStatus(UnitStatus.IDLE);
+		this.setStatus(UnitStatus.WALKING);
 		
 	}
 	
@@ -584,10 +560,10 @@ public class Unit {
 			return false;
 		if (name.length() < 2)
 			return false;
-		if (!name.substring(0,1).matches("A-Z"))
+		if (! Character.isUpperCase(name.charAt(0)))
 			return false;
-		return name.substring(1).matches("[A-Za-z\'\" ]+");
-
+		return (name.matches("[A-Za-z\'\" ]+"));
+		
 
 	}
 
@@ -621,14 +597,14 @@ public class Unit {
 	
 	/*Orientation*/
 
-
-
-
+	/**
+	 * Return the orientation of this unit.
+	 */
 	@Basic @Raw
 	public float getOrientation() {
 		return this.orientation;
 	}
-	
+
 	/**
 	 * Check whether the given orientation is a valid orientation for
 	 * any unit.
@@ -643,12 +619,13 @@ public class Unit {
 	public static boolean isValidOrientation(float orientation) {
 		return orientation >= 0 && orientation < 2*Math.PI;
 	}
-	
+
 	/**
 	 * Set the orientation of this unit to the given orientation.
 	 * 
 	 * @param  orientation
 	 *         The new orientation for this unit.
+
 	 * @post   The orientation is set to the physically corresponding orientation between 0 and 2*Math.PI.
 	 * 		   For positive orientation, this is the remainder of a division by 2*Math.PI.
 	 * 		   For negative orientation, this is 2*Math.PI minus the remainder of a division by
@@ -669,14 +646,11 @@ public class Unit {
 		else 
 			this.orientation = (float) (2*Math.PI - ( -orientation % 2*Math.PI));
 	}
-	
-	
+
 	/**
 	 * Variable registering the orientation of this unit.
 	 */
-	private float orientation;
-
-	
+	private float orientation = (float) Math.PI/2;
 
 
 	/**
@@ -747,7 +721,7 @@ public class Unit {
 
 
 
-	/** TODO:canAttack
+	/**
 	 * Check whether this Unit can attack the other Unit
 	 *
 	 * @param 	other
@@ -783,32 +757,7 @@ public class Unit {
 	
 	
 	
-	/* Attributes */
-	/**
-	 * Check whether the given attribute is a valid attribute for
-	 * any Unit.
-	 *
-	 * @param  attribute
-	 *         The attribute to check.
-	 * @return
-	 *       | result == ((1 <= attribute) && (attribute < 200))
-	*/
-	public static boolean isValidUnitAttribute(int attribute) {
-		return ((1 <= attribute) && (attribute <= 200));
-	}
-
-	/**
-	 * Check whether the given attribute is a valid attribute for
-	 * the initialization of any Unit
-	 *
-	 * @param 	toughness
-	 * 			The attribute to check
-	 * @return
-	 *		| result == ((25 <= attribute) && (attribute <= 100)
-	 */
-	public boolean isValidStartAttribute(int attribute){
-		return ((25 <= attribute) && (attribute <= 100));
-	}
+	
 	
 	/* Speed */
 	/**
@@ -1005,12 +954,16 @@ public class Unit {
 	 *         the weight of this new Unit is equal to the given
 	 *         weight.
 	 *       | if (isValidWeight(weight))
-	 *       |   then new.getWeight() == weight
+	 *       |   	then new.getWeight() == weight
+	 *       | else
+	 *		 |		this.weight = (this.getStrength() + this.getAgility())/2
 	 */
 	@Raw
 	public void setWeight(int weight) {
 		if (isValidWeight(weight))
 			this.weight = weight;
+		else
+			this.weight = (this.getStrength() + this.getAgility())/2;
 	}
 
 	/**
@@ -1020,6 +973,32 @@ public class Unit {
 	
 	/* END Weight*/
 	
+	/* Attributes */
+	/**
+	 * Check whether the given attribute is a valid attribute for
+	 * any Unit.
+	 *
+	 * @param  attribute
+	 *         The attribute to check.
+	 * @return
+	 *       | result == ((1 <= attribute) && (attribute < 200))
+	*/
+	public static boolean isValidUnitAttribute(int attribute) {
+		return ((1 <= attribute) && (attribute <= 200));
+	}
+
+	/**
+	 * Check whether the given attribute is a valid attribute for
+	 * the initialization of any Unit
+	 *
+	 * @param 	toughness
+	 * 			The attribute to check
+	 * @return
+	 *		| result == ((25 <= attribute) && (attribute <= 100)
+	 */
+	public static boolean isValidStartAttribute(int attribute){
+		return ((25 <= attribute) && (attribute <= 100));
+	}
 	
 	/* Strength*/
 	/**
@@ -1039,12 +1018,16 @@ public class Unit {
 	 *         the strength of this new Unit is equal to the given
 	 *         strength.
 	 *       | if (isValidUnitAttribute(strength))
-	 *       |   then new.getStrength() == strength
+	 *       |   	then new.getStrength() == strength
+	 *       | else
+	 *       		new.getStrength() == 25
 	 */
 	@Raw
 	public void setStrength(int strength) {
 		if (isValidUnitAttribute(strength))
 			this.strength = strength;
+		else
+			this.strength = 25;
 	}
 
 	/**
@@ -1074,11 +1057,15 @@ public class Unit {
 	 *         agility.
 	 *       | if (isValidUnitAttribute(agility))
 	 *       |   then new.getAgility() == agility
+	 *       | else
+	 *       |	 new.getAgility() == 25
 	 */
 	@Raw
 	public void setAgility(int agility) {
 		if (isValidUnitAttribute(agility))
 			this.agility = agility;
+		else
+			this.agility = 25;
 	}
 
 	/**
@@ -1108,11 +1095,15 @@ public class Unit {
 	 *         toughness.
 	 *       | if (isValidUnitAttribute(toughness))
 	 *       |   then new.getToughness() == toughness
+	 *		 | else
+	 *		 | 	 new.getToughness() == 25
 	 */
 	@Raw
 	public void setToughness(int toughness) {
 		if (isValidUnitAttribute(toughness))
 			this.toughness = toughness;
+		else
+			this.toughness = 25;
 	}
 
 	/**
@@ -1245,14 +1236,14 @@ public class Unit {
 	 */
 	public void work() throws IllegalArgumentException {
 		this.setWorkTime(500.0d /strength);
-		this.status = UnitStatus.WORKING;
+		this.setStatus(UnitStatus.WORKING);
 	}
 
 	/**
 	 * Return the workTime of this Unit.
 	 */
 	@Basic @Raw
-	public double getWorkTime() {
+	private double getWorkTime() {
 		return this.worktime;
 	}
 
@@ -1265,7 +1256,7 @@ public class Unit {
 	 * @return
 	 *       | result == (worktime >= 0)
 	*/
-	public static boolean isValidWorkTime(double worktime) {
+	private static boolean isValidWorkTime(double worktime) {
 		return Util.fuzzyGreaterThanOrEqualTo(worktime, 0);
 	}
 
@@ -1280,7 +1271,7 @@ public class Unit {
 	 * @throws IllegalArgumentException
 	 *         The given workTime is not a valid workTime for any
 	 *         Unit.
-	 *       | ! isValidWorkTime(getWorkTime())
+	 *       | ! isValidWorkTime(worktime)
 	 */
 	@Raw
 	private void setWorkTime(double worktime) throws IllegalArgumentException {
@@ -1297,7 +1288,7 @@ public class Unit {
 	 * @throws 	IllegalArgumentException
 	 * 			The given time is not a valid time for any Unit.
 	 */
-	public void advanceWorkTime(double time) throws IllegalArgumentException{
+	private void advanceWorkTime(double time) throws IllegalArgumentException{
 		if (! isValidTime(time))
 				throw new IllegalArgumentException("The given time is not a valid time");
 
@@ -1341,7 +1332,7 @@ public class Unit {
 	 * Return the attackCountDown of this Unit.
 	 */
 	@Basic @Raw
-	public double getAttackCountDown() {
+	private double getAttackCountDown() {
 		return this.attackCountDown;
 	}
 
@@ -1354,7 +1345,7 @@ public class Unit {
 	 * @return
 	 *       | result == (0 <= attackCountDown <=1 )
 	*/
-	public static boolean isValidAttackCountDown(double attackCountDown) {
+	private static boolean isValidAttackCountDown(double attackCountDown) {
 		return ((Util.fuzzyGreaterThanOrEqualTo(attackCountDown, 0)) &&
 				(Util.fuzzyGreaterThanOrEqualTo(1, attackCountDown)));
 	}
@@ -1386,11 +1377,14 @@ public class Unit {
 	 * 			The time to be subtracted from attackcountdown
 	 * @post	The attackCountDown of this Unit is reduced by the amount time
 	 * 			| new.getAttackCountDown() == this.getAttackCountDown() - time
+	 * @post	If the new attackcountdown is zero, the new status is idle
+	 * 			| if (new.getAttackCountDown <= 0)
+	 * 			|	new.getStatus() == UnitSTatus.Idle
 	 * @throws 	IllegalArgumentException
 	 * 			The given time is not a valid time for any Unit.
 	 * 			| ! isValidTime(time)
 	 */
-	public void advanceAttackTime(double time) throws IllegalArgumentException{
+	private void advanceAttackTime(double time) throws IllegalArgumentException{
 		if (! isValidTime(time))
 				throw new IllegalArgumentException("The given time is not a valid time");
 
@@ -1411,14 +1405,21 @@ public class Unit {
 
 	Random rnd = new Random();
 	/* Defend */
-	/** TODO:defend expand postcondition
+	/**
 	 * This Unit is attacked by the other Unit, and can take damage because of this
 	 *
 	 * @param 	other
 	 * 			The Unit attacking this Unit.
-	 * @post	If dodging and blocking failed, the hp of this unit is reduced by
-	 * 			strength of the attacker divided by ten
-	 * 			| if (
+	 * @effect	If dodging succeeds, move to a random tile around the unit
+	 * 			| if (this.dodgeChance(other))
+	 * 			| 		this.dodge
+	 * @effect	This Unit will face the attacking unit
+	 * 			| this.face(other)
+	 * @post	if dodging fails and blocking succeeds, nothing hapens and the method is stopped
+	 * 			| if (! this.dodgeChance(other)) && (! this.blockChance)
+	 * 			| 		new.getHP == this.getHP - other.getStrength/10
+	 * @post	the status of this unit is DEFENDING
+	 * 			| new.getStatus == UnitStatus.DEFENDING
 	 * @throws 	IllegalArgumentException
 	 * 			This Unit cannot be attacked by  the other Unit
 	 * 			| ! other.canAttack(this)
@@ -1430,23 +1431,48 @@ public class Unit {
 		this.setStatus(UnitStatus.DEFENDING);
 		this.face(other);
 
-		double dodgeChance = (0.2d* this.getAgility())/other.getAgility();
-
-		if (Util.fuzzyGreaterThanOrEqualTo(rnd.nextDouble(),dodgeChance)){ //nextDouble maakt random getal tussen 0 en 1
+		if (this.dodgeChance(other)){
 			this.dodge();
 			//this.setStatus(UnitStatus.IDLE); //TODO:hier, of in advanceTime?
 			return;
 		}
-		double blockChance = (0.25d* (this.getStrength() + this.getAgility()))
-				/(other.getStrength()+other.getAgility());
-		if (Util.fuzzyGreaterThanOrEqualTo(rnd.nextDouble(),blockChance)){
+		
+		if (this.blockChance(other)){
 			//this.setStatus(UnitStatus.IDLE);
 			return;
 		}
 		int newHP = this.getHP() - other.getStrength()/10;
 		this.setHP(newHP);
-
  	}
+	
+	/**
+	 * Will return true if this unit succesfully dodges the attack by the other unit
+	 * 
+	 * @param other
+	 * 			The Unit attacking this Unit
+	 * @return	
+	 * 			| result == (RandomNumberBetween0And1 <= (0.2d* this.getAgility())/other.getAgility())
+	 */
+	private boolean dodgeChance(Unit other){
+		double dodgeChance = (0.2d* this.getAgility())/other.getAgility();
+		return (Util.fuzzyLessThanOrEqualTo(rnd.nextDouble(),dodgeChance));
+	}
+	
+	/**
+	 * Will return true if this unit succesfully blocks the attack by the other unit
+	 * 
+	 * @param other
+	 * 			The Unit attacking this Unit
+	 * @return
+	 * 			| result == (RandomNumberBetween0And1 <= (0.25d* (this.getStrength() + this.getAgility()))
+	 *														/(other.getStrength()+other.getAgility())
+	 */
+	private boolean blockChance(Unit other){
+	double blockChance = (0.25d* (this.getStrength() + this.getAgility()))
+			/(other.getStrength()+other.getAgility());
+	return (Util.fuzzyLessThanOrEqualTo(rnd.nextDouble(),blockChance));
+	
+	}
 	/* END Defend */
 	
 	
@@ -1480,9 +1506,26 @@ public class Unit {
 	 * 			| isValidTime(time)
 	 * @pre		This Unit is in RESTING or REST status
 	 * 			| (this.getStatus() == UnitStatus.REST) || (this.getStatus() == UnitStatus.RESTING)
-	 * @post	TODO: postcondities
+	 * @post	If this Unit has status REST, and the time needed to heal 1 hp has passed, 
+	 * 				set the status to resting
+	 * 			| if (newTime > 0) && (this.getStatus == UnitStatus.REST)
+	 * 			|	new.getStatus == UnitStatus.RESTING
+	 * @post	if this unit does not have maximum hp yet, and the time needed to heal 1 hp
+	 * 				has passed, one hp will be added, and 
+	 * 			| if (this.getMaxHP != this.getHP) && (newTime >= 0)
+	 * 			|	new.getHP == this.getHP + 1
+	 * 			|   new.getRestTime == newTime
+	 * @post	if this unit has maximum hp, does not have maximum stamina, 
+	 * 				and the time needed to heal 1 stamina has passed
+	 * 			| if (this.getMaxHP == this.getHP) && (this.getMaxStamina != this.getStamina) 
+	 * 							&& (newTime1 >= 0)
+	 * 			|	new.getStamina == this.getStamina + 1
+	 * 			|   new.getRestTime == newTime1
+	 * @post	if this unit has maximum hp and maximum stamina, set status to IDLE
+	 * 			| if (this.getMaxHP == this.getHP) && (this.getMaxStamina == this.getStamina)
+	 * 			|	new.getStatus == UnitStatus.IDLE
 	 */
-	public void advanceRest(double time){
+	private void advanceRest(double time){
 		assert isValidTime(time);
 		assert (this.getStatus() == UnitStatus.REST) || (this.getStatus() == UnitStatus.RESTING);
 
@@ -1505,9 +1548,9 @@ public class Unit {
 		// check for stamina
 		else if (this.getStamina() != this.getMaxStamina()){
 			double oneStaminaTime = this.getToughness()/(100d * 0.2d);
-			double newTimeT = this.getRestTime() - oneStaminaTime;
-			if (Util.fuzzyGreaterThanOrEqualTo(newTimeT, 0)){
-				this.setRestTime(newTimeT);
+			double newTime1 = this.getRestTime() - oneStaminaTime;
+			if (Util.fuzzyGreaterThanOrEqualTo(newTime1, 0)){
+				this.setRestTime(newTime1);
 				this.setStamina(this.getStamina() + 1);
 			}
 			return;
@@ -1522,7 +1565,7 @@ public class Unit {
 	 * Return the restTime of this Unit.
 	 */
 	@Basic @Raw
-	public double getRestTime() {
+	private double getRestTime() {
 		return this.restTime;
 	}
 
@@ -1535,7 +1578,7 @@ public class Unit {
 	 * @return
 	 *       | result == (restTime >= 0))
 	*/
-	public static boolean isValidRestTime(double restTime) {
+	private static boolean isValidRestTime(double restTime) {
 		return (Util.fuzzyGreaterThanOrEqualTo(restTime, 0));
 	}
 
@@ -1552,7 +1595,7 @@ public class Unit {
 	 *       | new.getRestTime() == restTime
 	 */
 	@Raw
-	public void setRestTime(double restTime) {
+	private void setRestTime(double restTime) {
 		assert isValidRestTime(restTime);
 		this.restTime = restTime;
 	}
@@ -1581,7 +1624,7 @@ public class Unit {
 	 * @return
 	 *       | result == (status != null)
 	*/
-	public static boolean isValidStatus(UnitStatus status) {
+	private static boolean isValidStatus(UnitStatus status) {
 		return (status != null);
 	}
 
@@ -1613,7 +1656,7 @@ public class Unit {
 	
 	
 	/* AdvanceTime */
-	/** TODO: fuzzyequals gebruiken misschien
+	/** 
 	 * Check whether the given time is valid for any Unit
 	 *
 	 * @param 	time
@@ -1622,7 +1665,8 @@ public class Unit {
 	 * 			| result == ((time > 0) && (time < 0.2))
 	 */
 	public static boolean isValidTime(double time){
-        return (time > 0) && (time < 0.2);
+        return Util.fuzzyGreaterThanOrEqualTo(time, 0) && Util.fuzzyLessThanOrEqualTo(time, 0.2)
+        			&& (! Util.fuzzyEquals(time, 0)) && (! Util.fuzzyEquals(time, 0.2));
 	}
 
 	//TODO:advanceTime every unit rests automaticaly every 3 minutes
@@ -1636,8 +1680,6 @@ public class Unit {
 	 *
 	 * @post   This Unit  is terminated.
 	 *       | new.isTerminated()
-	 * @post   ...
-	 *       | ...
 	 */
 	 public void terminate() {
 		 this.isTerminated = true;
@@ -1662,7 +1704,7 @@ public class Unit {
 	 
 	 /* DefaultBehaviour*/
 	 
-	 /**TODO defaultdocumentatie
+	 /**
 	  * The Unit is in default behaviour mode
 	  * 
 	  * @post	the defaultBoolean is true
@@ -1675,10 +1717,10 @@ public class Unit {
 		 this.defaultBehaviour();
 	 }
 	 
-	 /**TODO defaultdocumentatie
+	 /**
 	  * The Unit is no longer in default behavior mode
 	  * 
-	  * @post	the defaultBoolean is true
+	  * @post	the defaultBoolean is false
 	  * 		| new.getDefaultBoolean == false
 	  */
 	 public void stopDefaultBehaviour(){
@@ -1689,8 +1731,19 @@ public class Unit {
 	  * Determine the next behaviour 
 	  * 
 	  * @throws IllegalStateException
+	  * 		The unit is not in defaultbehaviour
+	  * 		| ! this.getDefaultBoolean()
+	  * @effect	1/3 of the times this method is called, the unit will work
+	  * 		| if (RandomNumberBetween0And1 <= 1/3)
+	  * 		|	this.work()
+	  * @effect 1/3 of the time this method is called, the unit will rest
+	  * 		| if (1/3 < RandomNumberBetween0And1 <= 2/3)
+	  * 		|	this.rest()
+	  * @effect	1/3 of the time this method is called, the unit will walk to a random location
+	  * 		| if (2/3 < RandomNumberBetween0And1)
+	  * 		|	this.moveToRandom()
 	  */
-	 public void defaultBehaviour() throws IllegalStateException{
+	 private void defaultBehaviour() throws IllegalStateException{
 		if (! this.getDefaultBoolean())
 			throw new IllegalStateException();
 		 
@@ -1727,7 +1780,7 @@ public class Unit {
 	 * @return 
 	 *       | result == (defaultBoolean == true) || (defaultBoolean == false)
 	*/
-	public static boolean isValidDefaultBoolean(boolean defaultBoolean) {
+	private static boolean isValidDefaultBoolean(boolean defaultBoolean) {
 		return (defaultBoolean == true) || (defaultBoolean == false);
 	}
 	
@@ -1745,7 +1798,7 @@ public class Unit {
 	 *       | ! isValidDefaultBoolean(getDefaultBoolean())
 	 */
 	@Raw
-	public void setDefaultBoolean(boolean defaultBoolean) throws IllegalArgumentException {
+	private void setDefaultBoolean(boolean defaultBoolean) throws IllegalArgumentException {
 		if (! isValidDefaultBoolean(defaultBoolean))
 			throw new IllegalArgumentException();
 		this.defaultBoolean = defaultBoolean;
@@ -1754,9 +1807,8 @@ public class Unit {
 	/**
 	 * Variable registering the defaultBoolean of this Unit.
 	 */
-	private boolean defaultBoolean;
-	
-	/* Time */
-	
-	
+
+	private boolean defaultBoolean = false;
+
+
 }
