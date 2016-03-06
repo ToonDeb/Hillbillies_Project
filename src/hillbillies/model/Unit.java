@@ -303,11 +303,66 @@ public class Unit {
 			
 	}
 	/**
-	 * Sets the finalDestination of the unit to finalDestination, 
-	 * @param finalDestination
+	 * Sets the units status to walking, and the units adjacentDestination to adjacentDestination.
+	 * 
+	 * @param	finalDestination
+	 * 			The final destination for this unit.
+	 * @effect 	The units status is set to WALKING, the units finalDestination is set to finalDestination
+	 * 		|  	this.setStatus(UnitStatus.WALKING);
+			|  	this.setFinalDestination(finalDestination);
+	 * @throws 	IllegalArgumentException
+	 * 			The given finalDestination is not a valid finalDestination
+	 * 		|	! isValidFinalDestination(finalDestination)
 	 */
-	public void moveTo(Vector3d finalDestination){
+	public void moveTo(Vector3d finalDestination) throws IllegalArgumentException {
+		if (! isValidFinalDestination(finalDestination))
+			throw new IllegalArgumentException("Invalid final destination!");
+		this.setStatus(UnitStatus.WALKING);
+		this.setFinalDestination(finalDestination);
+
+	}
+	/**
+	 * Return the next step (the adjacent destination) of this unit based on its final destination.
+	 * 
+	 * @return
+	 */
+	public Vector3d findPath() {
+		double xFinalDes = this.getFinalDestination().getX();
+		double yFinalDes = this.getFinalDestination().getY();
+		double zFinalDes = this.getFinalDestination().getZ();
 		
+		double xThis = this.getPosition().getX();
+		double yThis = this.getPosition().getY();
+		double zThis = this.getPosition().getZ();
+		
+		double xAdjDes;
+		double yAdjDes;
+		double zAdjDes;
+		
+		if (Util.fuzzyEquals(xThis, xFinalDes))
+			xAdjDes = this.getCubePosition()[0] + 0.5;
+		else if (xThis < xFinalDes)
+			xAdjDes = this.getCubePosition()[0] + 1.5;
+		else
+			xAdjDes = this.getCubePosition()[0] - 0.5;
+		
+		if (Util.fuzzyEquals(yThis, yFinalDes))
+			yAdjDes = this.getCubePosition()[1] + 0.5;
+		else if (yThis < yFinalDes)
+			yAdjDes = this.getCubePosition()[1] + 1.5;
+		else
+			yAdjDes = this.getCubePosition()[1] - 0.5;
+		
+		if (Util.fuzzyEquals(zThis, zFinalDes))
+			zAdjDes = this.getCubePosition()[2] + 0.5;
+		else if (zThis < zFinalDes)
+			zAdjDes = this.getCubePosition()[2] + 1.5;
+		else
+			zAdjDes = this.getCubePosition()[2] - 0.5;
+		return new Vector3d(xAdjDes, yAdjDes, zAdjDes);
+
+		
+			
 	}
 	
 	/***
