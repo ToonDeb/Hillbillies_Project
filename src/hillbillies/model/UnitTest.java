@@ -189,52 +189,7 @@ public class UnitTest {
 		testingUnit.setOrientation((float) -Math.PI);
 		assertTrue(Util.fuzzyEquals(testingUnit.getOrientation(), (float) Math.PI));
 	}
-	
-	@Test
-	public void testFace(){
-		testingUnit.face(otherUnit);
-		otherUnit.face(testingUnit);
-		assertTrue(Util.fuzzyEquals(testingUnit.getOrientation(), - otherUnit.getOrientation()));
-	}
-	
-	@Test
-	public void testCanAttack$TrueXCase(){
-		otherUnit.setPosition(new Vector3d(26d,25d,25d));
-		testingUnit.setPosition(new Vector3d(25d,25d,25d));
-		assertTrue(testingUnit.canAttack(otherUnit));
-		assertTrue(otherUnit.canAttack(testingUnit));
-	}
-	
-	@Test
-	public void testCanAttack$TrueYCase(){
-		otherUnit.setPosition(new Vector3d(25d,26d,25d));
-		testingUnit.setPosition(new Vector3d(25d,25d,25d));
-		assertTrue(testingUnit.canAttack(otherUnit));
-		assertTrue(otherUnit.canAttack(testingUnit));
-	}
-	
-	@Test
-	public void testCanAttack$FalseCase(){
-		otherUnit.setPosition(new Vector3d(9d,1d,25d));
-		testingUnit.setPosition(new Vector3d(25d,25d,25d));
-		assertFalse(testingUnit.canAttack(otherUnit));
-		assertFalse(otherUnit.canAttack(testingUnit));
-	}
-	
-	@Test
-	public void testGetBaseSpeed(){
-		testingUnit.setStrength(100);
-		testingUnit.setAgility(100);
-		testingUnit.setStrength(100);
-		assertTrue(Util.fuzzyEquals(testingUnit.getBaseSpeed(), 1.5));
-	}
-	
-	@Test
-	public void testGetSpeed(){
-		testingUnit.setStatus(UnitStatus.WALKING);
-		testingUnit.setFinalDestination(new Vector3d(25d, 26d, 25d));
-		assertTrue(Util.fuzzyEquals(testingUnit.getSpeed(), testingUnit.getBaseSpeed()));
-	}
+
 	@Test
 	public void testStartSprint(){
 		testingUnit.startSprint();

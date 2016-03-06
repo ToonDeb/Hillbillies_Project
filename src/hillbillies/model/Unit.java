@@ -9,7 +9,6 @@ import javax.vecmath.*;
 import be.kuleuven.cs.som.annotate.*;
 import ogp.framework.util.Util;
 
-/**TODO declare variables for boundary and other constant values
 
 /**
  * @authors Toon, Nathan
@@ -71,7 +70,15 @@ import ogp.framework.util.Util;
  * @invar  The finalDestination of each unit must be a valid finalDestination for any
  *         unit.
  *       | isValidFinalDestination(getFinalDestination())
+ *       
+ * @invar  The walkTimer of each Unit must be a valid walkTimer for any
+ *         Unit.
+ *       | isValidWalkTimer(getWalkTimer())
  *
+ * @invar  The origin of each Unit must be a valid origin for any
+ *         Unit.
+ *       | isValidOrigin(getOrigin())
+ *       
  * @version 0.1
  */
 public class Unit {
@@ -187,9 +194,8 @@ public class Unit {
 		this.setAdjacentDestination(pos);
 		this.setFinalDestination(pos);
 		
-		System.out.println("Unit created");
-		System.out.println("current position");
-		System.out.println(this.getPosition());
+		this.setOrigin(this.getCubePosition());
+		
 	}
 
 	/**
@@ -273,8 +279,6 @@ public class Unit {
 	public void moveToAdjacent(Vector3d adjacentDestination) throws IllegalArgumentException{
 		if (! isValidAdjacentDestination(adjacentDestination))
 			throw new IllegalArgumentException("Invalid adjacentDestination!");
-		System.out.println("test");
-		System.out.println(adjacentDestination);
 		this.setStatus(UnitStatus.WALKING);
 		if (this.getPosition() == this.getFinalDestination()){
 			this.setAdjacentDestination(adjacentDestination);
@@ -282,7 +286,6 @@ public class Unit {
 		}
 		else
 			this.setAdjacentDestination(adjacentDestination);
-		this.updateOrientation();
 	}
 	
 	/**
@@ -364,28 +367,6 @@ public class Unit {
 	 * 			The adjacentDestination of the unit.
 	 * @post	The new position of this unit is where the unit would be if it went at its speed, towards the given adjacentDestination, 
 	 * 				during the given time, if that position doesn't equal or surpass the adjacentDestination.
-	 * 		|	let 
-	 * 		| 		oldPosition = this.getPosition()
-	 * 		|		xDistance = adjacentDestination.x - this.getPosition().x,
-	 * 		|		yDistance = adjacentDestination.x - this.getPosition().y,
-	 *		|		zDistance = adjacentDestination.x - this.getPosition().z,
-	 *		|		totalDistance =  Math.sqrt(Math.pow(xDistance, 2) +
-	 *		|							Math.pow(yDistance, 2)+ 
-	 *		|								Math.pow(zDistance, 2)),
-	 *		|		speed = this.getSpeed(),
-	 *		|		velocity = Vector3d(speed*xDistance/totalDistance, 
-	 *		|							speed*yDistance/totalDistance, 
-	 *		|							speed*zDistance/totalDistance),
-	 *		|		newPosition = velocity*time + this.getPosition()
-	 *		|		newDistance = (newPosition - adjacentDestination)
-	 *		|		oldDistance = (oldPosition - adjacentDestination)
-	 * 		|	in
-	 * 		|		if (( old.Position != adjacentDestination) && 
-	 * 		|				(! (newDistance).length < (oldDistance).length))
-	 * 		|			new.getPosition == newPosition
-	 * 		|		else
-	 * 		|			new.getPosition == adjacentDestination	
-	 * 
 	 * @throws	IllegalArgumentException
 	 * 			The given time is not a valid time
 	 * 		|	! isValidTime(time)
@@ -393,15 +374,13 @@ public class Unit {
 	private void updatePosition(double time) throws IllegalArgumentException, IllegalStateException{
 		if (!isValidTime(time))
 			throw new IllegalArgumentException("Invalid time!");
-		
+		this.updateOrientation();
 		Vector3d nextPosition = this.getVelocity();
 		nextPosition.scaleAdd(time, this.getPosition());
-		
-		if (this.destinationIsReached(nextPosition, this.getAdjacentDestination())){
-			System.out.println("destination Reached, sthaph");
+		this.setWalkTimer(this.getWalkTimer() - time);
+		if (this.destinationIsReached(nextPosition, this.getAdjacentDestination()) || (this.getWalkTimer() < 0) ){
 			this.setPosition(this.getAdjacentDestination());
 			if (this.destinationIsReached(this.getPosition(),this.getFinalDestination())){
-				System.out.println("but it worked?");
 				this.setStatus(UnitStatus.IDLE);
 			}
 			else{
@@ -411,14 +390,105 @@ public class Unit {
 		else{
 			this.setPosition(nextPosition);
 		}
-		
-		System.out.println("current position");
-		System.out.println(this.getPosition());
-		System.out.println("adjacent destination");
-		System.out.println(this.getAdjacentDestination());
-		System.out.println("final destination");
-		System.out.println(this.getFinalDestination());
 	}
+
+	/**
+	 * Return the walkTimer of this Unit.
+	 */
+	@Basic @Raw
+	private double getWalkTimer() {
+		return this.walkTimer;
+	}
+	/**
+	 * Check whether the given walkTimer is a valid walkTimer for
+	 * any Unit. Every walkTimer is valid
+	 *  
+	 * @param  walkTimer
+	 *         The walkTimer to check.
+	 * @return 
+	 *       | result == true
+	*/
+	private static boolean isValidWalkTimer(double walkTimer) {
+		return true;
+	}
+
+	/**
+	 * Set the walkTimer of this Unit to the given walkTimer.
+	 * 
+	 * @param  walkTimer
+	 *         The new walkTimer for this Unit.
+	 * @post   The walkTimer of this new Unit is equal to
+	 *         the given walkTimer.
+	 *       | new.getWalkTimer() == walkTimer
+	 * @throws IllegalArgumentException
+	 *         The given walkTimer is not a valid walkTimer for any
+	 *         Unit.
+	 *       | ! isValidWalkTimer(getWalkTimer())
+	 */
+	@Raw
+	private void setWalkTimer(double walkTimer) 
+			throws IllegalArgumentException {
+		if (! isValidWalkTimer(walkTimer))
+			throw new IllegalArgumentException();
+		this.walkTimer = walkTimer;
+	}
+
+	/**
+	 * Variable registering the walkTimer of this Unit.
+	 */
+	private double walkTimer = 0;
+	
+
+
+
+
+
+	/**
+	 * Return the origin of this Unit.
+	 */
+	@Basic @Raw
+	private int[] getOrigin() {
+		return this.origin;
+	}
+
+	/**
+	 * Check whether the given origin is a valid origin for
+	 * any Unit.
+	 *  
+	 * @param  origin
+	 *         The origin to check.
+	 * @return 
+	 *       | result == (isValidPosition(origin))
+	*/
+	private static boolean isValidOrigin(int[] origin) {
+		return isValidPosition(new Vector3d(origin[0], origin[1], origin[2]));
+	}
+
+	/**
+	 * Set the origin of this Unit to the given origin.
+	 * 
+	 * @param  origin
+	 *         The new origin for this Unit.
+	 * @post   The origin of this new Unit is equal to
+	 *         the given origin.
+	 *       | new.getOrigin() == origin
+	 * @throws IllegalArgumentException
+	 *         The given origin is not a valid origin for any
+	 *         Unit.
+	 *       | ! isValidOrigin(getOrigin())
+	 */
+	@Raw
+	private void setOrigin(int[] origin) 
+			throws IllegalArgumentException {
+		if (! isValidOrigin(origin))
+			throw new IllegalArgumentException();
+		this.origin = origin;
+	}
+
+	/**
+	 * Variable registering the origin of this Unit.
+	 */
+	private int[] origin = {0, 0, 0};
 	
 	/**
 	 * Check if destination is reached of surpassed
@@ -440,6 +510,9 @@ public class Unit {
 				&& (Util.fuzzyGreaterThanOrEqualTo(destination.y, newPosition.y))
 				&& (Util.fuzzyGreaterThanOrEqualTo(this.getPosition().z, destination.z))
 				&& (Util.fuzzyGreaterThanOrEqualTo(destination.z, newPosition.z)))
+			return true;
+		
+		if (newPosition.epsilonEquals(destination, 1E-2))
 			return true;
 		return false;
 	}
@@ -467,8 +540,6 @@ public class Unit {
 		velocity.normalize();
 		double speed = this.getSpeed();
 		velocity.scale(speed);
-		System.out.println("velocity");
-		System.out.println(velocity);
 		return velocity;
 	}
 	
@@ -493,7 +564,7 @@ public class Unit {
 		double vy = velocity.y;
 		double vx = velocity.x;
 		
-		float newOrientation = (float) Math.atan2(vy, vx);
+		double newOrientation = (double) Math.atan2(vy, vx);
 		this.setOrientation(newOrientation);
 			
 	}
@@ -578,8 +649,6 @@ public class Unit {
 		if (! Character.isUpperCase(name.charAt(0)))
 			return false;
 		return (name.matches("[A-Za-z\'\" ]+"));
-		
-
 	}
 
 	/**
@@ -612,7 +681,7 @@ public class Unit {
 	 * Return the orientation of this unit.
 	 */
 	@Basic @Raw
-	public float getOrientation() {
+	public double getOrientation() {
 		return this.orientation;
 	}
 
@@ -631,37 +700,31 @@ public class Unit {
 		return orientation >= 0 && orientation < 2*Math.PI;
 	}
 
-	/**
+	/** 
 	 * Set the orientation of this unit to the given orientation.
 	 * 
 	 * @param  orientation
 	 *         The new orientation for this unit.
 
-	 * @post   The orientation is set to the physically corresponding orientation between 0 and 2*Math.PI.
-	 * 		   For positive orientation, this is the remainder of a division by 2*Math.PI.
-	 * 		   For negative orientation, this is 2*Math.PI minus the remainder of a division by
-	 * 			2*Math.PI of the absolute value of the given orientation.
-	 *       | if (orientation >= 0)
-	 *       | 		let
-	 *       | 			correspondingOrientation = (orientation % 2*Math.PI)
-	 *       | else
-	 *       | 		let
-	 *       | 			correspondingOrientation = (2*Math.PI - ( -orientation % 2*Math.PI))
-	 *       | in
-	 *       |		new.getOrientation() == correspondingOrientation
+	 * @post   The orientation is set to the physically corresponding orientation between -2*Math.PI and 2*Math.PI.
+	 * 		   | if (Math.abs(orientation) > 2*Math.PI)
+	 * 		   | 	new.getOrientation = orientation % 2*Math.PI
 	 */
 	@Raw
-	public void setOrientation(float orientation) {
-		if (orientation >= 0)
-			this.orientation = (float) (orientation % 2*Math.PI);
-		else 
-			this.orientation = (float) (2*Math.PI - ( -orientation % 2*Math.PI));
+	public void setOrientation(double orientation) {
+		while (orientation > 2*Math.PI){
+			orientation = orientation - 2*Math.PI;
+		}
+		while (orientation < -2*Math.PI){
+			orientation = orientation + 2*Math.PI;
+		}
+		this.orientation = (double) (orientation);
 	}
-
+	
 	/**
 	 * Variable registering the orientation of this unit.
 	 */
-	private float orientation = (float) Math.PI/2;
+	private double orientation = (double) Math.PI/2;
 
 
 	/**
@@ -675,7 +738,7 @@ public class Unit {
 	 * 			the given other unit is not in a valid position
 	 * 			| ! this.canAttack(other)
 	 */
-	public void face(Unit other) throws IllegalArgumentException{
+	private void face(Unit other) throws IllegalArgumentException{
 		if (! this.canAttack(other))
 			throw new IllegalArgumentException("the other unit is not on a valid position");
 		double x_this = this.getPosition().x;
@@ -683,7 +746,7 @@ public class Unit {
 		double x_other = other.getPosition().x;
 		double y_other = other.getPosition().y;
 		
-		float this_orientation = (float) Math.atan2(y_other - y_this, x_other - x_this);
+		double this_orientation = (double) Math.atan2(y_other - y_this, x_other - x_this);
 				
 		this.setOrientation(this_orientation);
 
@@ -702,7 +765,7 @@ public class Unit {
 	 * 
 	 *
 	 */
-	public void dodge() throws IllegalStateException {
+	private void dodge() throws IllegalStateException {
 		
 		if (!(this.getStatus() == UnitStatus.DEFENDING))
 				throw new IllegalStateException("Unit is not being attacked!");
@@ -718,9 +781,8 @@ public class Unit {
 			// Returns a double between -1 and +1
 			double xJump = 2*rnd.nextDouble() - 1;
 			double yJump = 2*rnd.nextDouble() - 1;
-			double zJump = 2*rnd.nextDouble() - 1;
 			
-			newPosition.set(thisX + xJump, thisY + yJump, thisZ + zJump);
+			newPosition.set(thisX + xJump, thisY + yJump, thisZ);
 			counter++;
 		}
 		 if (isValidPosition(newPosition))
@@ -744,7 +806,7 @@ public class Unit {
 	 * 			The other unit is not effective
 	 * 		  | other == null
 	 */
-	public boolean canAttack(Unit other) throws IllegalArgumentException{ 
+	private boolean canAttack(Unit other) throws IllegalArgumentException{ 
 		if (other == null)
 			throw new IllegalArgumentException("Non effective unit");
 		return (this.getCubePosition()[2] == other.getCubePosition()[2]) &&
@@ -752,24 +814,25 @@ public class Unit {
 				(Math.abs(this.getCubePosition()[1]- other.getCubePosition()[1]) < 2);
 	}
 	
-	/**TODO: movetorandom expand documentation
+	/**
 	 * set a random destination in the gameworld
-	 * @post	the status of this unit is "walking"
-	 * 			| new.getStatus() == UnitStatus.WALKING
+	 * 
+	 * @effect	Call the moveTo method, and give 3 random integers between 0 and 51
+	 * 			|	this.moveTo({randomBetween0And51,randomBetween0And51,randomBetween0And51})
 	 * 
 	 */
-	public void moveToRandom(){
-		
+	private void moveToRandom(){
+		double X = rnd.nextInt(51);
+		double Y = rnd.nextInt(51);
+		double Z = rnd.nextInt(51);
+		this.moveTo(new Vector3d(X, Y, Z));
 	}
-	
-	
-	
 	
 
 	/**
 	 * Return the base speed of this unit.
 	 */
-	public double getBaseSpeed() {
+	private double getBaseSpeed() {
 		return (double) (1.5*(this.getStrength()+  this.getAgility())/(200*weight/100));
 	}
 	/**
@@ -781,12 +844,9 @@ public class Unit {
 		double v;
 		UnitStatus status = this.getStatus();
 		
-		//if (!(status == UnitStatus.WALKING) || !(status == UnitStatus.SPRINTING))
-		//	throw new IllegalStateException("Unit not moving!");
-		
-		if (Util.fuzzyEquals(this.getPosition().z - this.getAdjacentDestination().z, -1))
+		if (this.getOrigin()[2] - this.getAdjacentDestination().z == -1)
 				v = (double) (0.5*vbase);
-		else if (Util.fuzzyEquals(this.getPosition().z - this.getAdjacentDestination().z, 1))
+		else if (this.getOrigin()[2] - this.getAdjacentDestination().z== 1)
 				v = (double) (1.2*vbase);
 		else
 				v = vbase;
@@ -796,6 +856,8 @@ public class Unit {
 				return (double) 2*v;
 		return (double) v;		
 	}
+	
+	
 	
 	/**
 	 * Return the adjacentDestination of this unit.
@@ -842,21 +904,24 @@ public class Unit {
 	 *       | ! isValidAdjacentDestination(getAdjacentDestination())
 	 */
 	@Raw
-	public void setAdjacentDestination(Vector3d adjacentDestination) 
+	private void setAdjacentDestination(Vector3d adjacentDestination) 
 			throws IllegalArgumentException {
-		//if (! isValidAdjacentDestination(adjacentDestination))
-		//	throw new IllegalArgumentException();
+		if (! isValidAdjacentDestination(adjacentDestination))
+			throw new IllegalArgumentException();
 		this.adjacentDestination = adjacentDestination;
+		
+		Vector3d newVector = new Vector3d(this.getPosition());
+		newVector.sub(adjacentDestination);
+		double length = newVector.length();
+		this.setWalkTimer(length/this.getSpeed());
+		
+		this.setOrigin(this.getCubePosition());
 	}
 	
 	/**
 	 * Variable registering the adjacentDestination of this unit.
 	 */
 	private Vector3d adjacentDestination = null;
-	
-	/*END adjacentDestination*/
-	
-	/* finalDestination */
 	
 	/**
 	 * Return the finalDestination of this unit.
@@ -876,7 +941,7 @@ public class Unit {
 	 *       |		return 
 	 *       |		isValidPosition(finalDestination) 
 	*/
-	public boolean isValidFinalDestination(Vector3d finalDestination) {
+	private boolean isValidFinalDestination(Vector3d finalDestination) {
 		return isValidPosition(finalDestination);
 	}
 	
@@ -894,7 +959,7 @@ public class Unit {
 	 *       | ! isValidFinalDestination(getFinalDestination())
 	 */
 	@Raw
-	public void setFinalDestination(Vector3d finalDestination) 
+	private void setFinalDestination(Vector3d finalDestination) 
 			throws IllegalArgumentException {
 		if (! isValidFinalDestination(finalDestination))
 			throw new IllegalArgumentException();
@@ -972,9 +1037,6 @@ public class Unit {
 	 */
 	private int weight;
 	
-	/* END Weight*/
-	
-	/* Attributes */
 	/**
 	 * Check whether the given attribute is a valid attribute for
 	 * any Unit.
@@ -1001,7 +1063,7 @@ public class Unit {
 		return ((25 <= attribute) && (attribute <= 100));
 	}
 	
-	/* Strength*/
+
 	/**
 	 * Return the strength of this Unit.
 	 */
@@ -1036,10 +1098,7 @@ public class Unit {
 	 */
 	private int strength;
 	
-	/*END Strength*/
 
-	
-	/* Agility*/
 	/**
 	 * Return the agility of this Unit.
 	 */
@@ -1074,10 +1133,7 @@ public class Unit {
 	 */
 	private int agility;
 	
-	/* END Agility */
-	
-	
-	/*Toughness*/
+
 	/**
 	 * Return the toughness of this Unit.
 	 */
@@ -1111,11 +1167,7 @@ public class Unit {
 	 * Variable registering the toughness of this Unit.
 	 */
 	private int toughness;
-	
-	/* END Toughness */
-	
-	
-	/* HP */
+
 	/**
 	 * Return the hitpoints of this Unit.
 	 */
@@ -1167,10 +1219,7 @@ public class Unit {
 	 */
 	private int hp;
 	
-	/* END HP */
-	
-	
-	/* Stamina */
+
 	/**
 	 * Return the stamina of this Unit.
 	 */
@@ -1222,12 +1271,7 @@ public class Unit {
 	 */
 	private int stamina;
 	
-	/* END Stamina */
-	
-	/* END Attribute*/
-	
-	
-	/* Work */
+
 	/**
 	 * Start the work-condition
 	 * @throws IllegalArgumentException
@@ -1307,10 +1351,6 @@ public class Unit {
 	 */
 	private double worktime = 0;
 	
-	/* END Work */
-	
-	
-	/* Attack */
 	/**
 	 * This Unit attacks the Other Unit
 	 *
@@ -1323,10 +1363,9 @@ public class Unit {
 		if (! this.canAttack(other))
 			throw new IllegalArgumentException("The other Unit cannot be attacked");
 		this.setAttackCountDown(1d);
+		this.face(other);
 		this.setStatus(UnitStatus.ATTACKING);
 		other.defend(this);
-		this.face(other);
-
 	}
 
 	/**
@@ -1402,10 +1441,10 @@ public class Unit {
 	 * Variable registering the attackCountDown of this Unit.
 	 */
 	private double attackCountDown = 0;
-	/* END Attack */
+
 
 	Random rnd = new Random();
-	/* Defend */
+
 	/**
 	 * This Unit is attacked by the other Unit, and can take damage because of this
 	 *
@@ -1474,11 +1513,7 @@ public class Unit {
 	return (Util.fuzzyLessThanOrEqualTo(rnd.nextDouble(),blockChance));
 	
 	}
-	/* END Defend */
-	
-	
-	/* Rest */
-	// nominaal
+
 	/**
 	 * Initiate the rest status for this unit.
 	 *
@@ -1605,9 +1640,7 @@ public class Unit {
 	 * Variable registering the restTime of this Unit.
 	 */
 	private double restTime = 0;
-	/* END Rest */
-	
-	/* Status */
+
 	/**
 	 * Return the status of this Unit.
 	 */
@@ -1675,7 +1708,7 @@ public class Unit {
 		}
 		if (this.getStatus() == UnitStatus.SPRINTING){
 			stamina = this.getStamina();
-			if (stamina >=0){
+			if (stamina >0){
 				this.sprintTime = this.sprintTime + deltaT;
 				if (Util.fuzzyGreaterThanOrEqualTo(this.sprintTime, 0.1)){
 					while (this.sprintTime > 0.1){
