@@ -129,19 +129,11 @@ public class Unit {
 	 *       
 	 * @post	the orientation of this new Unit is PI/2
 	 * 			| new.getOrientation == PI/2
-	 * xxxxxxxxxxONNODIGxxxxxxxxx
-	 * @param  stamina
- 	 *         The stamina for this new Unit.
- 	 * @pre    toughness and weight are valid.
-	 * 		 | isValidToughness(toughness) && isValidWeight(weight)
+	 * 
  	 * @post   The stamina of this new Unit is equal to the given
 	 *         stamina.
 	 *       | new.getStamina() == 200*(weight()/100)*(toughness()/100)
 	 *
-	 * @param  hp
-	 *         The hitpoints for this new Unit.
-	 * @pre    toughness and weight are valid.
-	 * 		 | isValidToughness(toughness) && isValidWeight(weight)
 	 * @post   The hitpoints of this new Unit is equal to the given
 	 *         hitpoints.
 	 *       | new.getHP() == 200*(weight/100)*(toughness/100)
@@ -158,7 +150,7 @@ public class Unit {
 	 * @effect The destination of this new unit is set to
 	 *         the given destination.
 	 *       | this.setDestination(destination)
-	 * xxxxxxxxxxONNODIGxxxxxxxxx
+	 *
 	 */
 	public Unit(String name, Vector3d position, int weight, int strength, int agility, int toughness)
 			throws IllegalArgumentException {
@@ -1072,10 +1064,13 @@ public class Unit {
 	 * @effect	If dodging succeeds, move to a random tile around the unit
 	 * 			| if (this.dodgeChance(other))
 	 * 			| 		this.dodge
+	 * @effect	This Unit will face the attacking unit
+	 * 			| this.face(other)
 	 * @post	if dodging fails and blocking succeeds, nothing hapens and the method is stopped
 	 * 			| if (! this.dodgeChance(other)) && (! this.blockChance)
 	 * 			| 		new.getHP == this.getHP - other.getStrength/10
-	 * 
+	 * @post	the status of this unit is DEFENDING
+	 * 			| new.getStatus == UnitStatus.DEFENDING
 	 * @throws 	IllegalArgumentException
 	 * 			This Unit cannot be attacked by  the other Unit
 	 * 			| ! other.canAttack(this)
@@ -1101,11 +1096,28 @@ public class Unit {
 		this.setHP(newHP);
  	}
 	
+	/**
+	 * Will return true if this unit succesfully dodges the attack by the other unit
+	 * 
+	 * @param other
+	 * 			The Unit attacking this Unit
+	 * @return	
+	 * 			| result == (RandomNumberBetween0And1 <= (0.2d* this.getAgility())/other.getAgility())
+	 */
 	private boolean dodgeChance(Unit other){
 		double dodgeChance = (0.2d* this.getAgility())/other.getAgility();
 		return (Util.fuzzyLessThanOrEqualTo(rnd.nextDouble(),dodgeChance));
 	}
 	
+	/**
+	 * Will return true if this unit succesfully blocks the attack by the other unit
+	 * 
+	 * @param other
+	 * 			The Unit attacking this Unit
+	 * @return
+	 * 			| result == (RandomNumberBetween0And1 <= (0.25d* (this.getStrength() + this.getAgility()))
+	 *														/(other.getStrength()+other.getAgility())
+	 */
 	private boolean blockChance(Unit other){
 	double blockChance = (0.25d* (this.getStrength() + this.getAgility()))
 			/(other.getStrength()+other.getAgility());
@@ -1145,7 +1157,24 @@ public class Unit {
 	 * 			| isValidTime(time)
 	 * @pre		This Unit is in RESTING or REST status
 	 * 			| (this.getStatus() == UnitStatus.REST) || (this.getStatus() == UnitStatus.RESTING)
-	 * @post	TODO: postcondities
+	 * @post	If this Unit has status REST, and the time needed to heal 1 hp has passed, 
+	 * 				set the status to resting
+	 * 			| if (newTime > 0) && (this.getStatus == UnitStatus.REST)
+	 * 			|	new.getStatus == UnitStatus.RESTING
+	 * @post	if this unit does not have maximum hp yet, and the time needed to heal 1 hp
+	 * 				has passed, one hp will be added, and 
+	 * 			| if (this.getMaxHP != this.getHP) && (newTime >= 0)
+	 * 			|	new.getHP == this.getHP + 1
+	 * 			|   new.getRestTime == newTime
+	 * @post	if this unit has maximum hp, does not have maximum stamina, 
+	 * 				and the time needed to heal 1 stamina has passed
+	 * 			| if (this.getMaxHP == this.getHP) && (this.getMaxStamina != this.getStamina) 
+	 * 							&& (newTime1 >= 0)
+	 * 			|	new.getStamina == this.getStamina + 1
+	 * 			|   new.getRestTime == newTime1
+	 * @post	if this unit has maximum hp and maximum stamina, set status to IDLE
+	 * 			| if (this.getMaxHP == this.getHP) && (this.getMaxStamina == this.getStamina)
+	 * 			|	new.getStatus == UnitStatus.IDLE
 	 */
 	private void advanceRest(double time){
 		assert isValidTime(time);
@@ -1170,9 +1199,9 @@ public class Unit {
 		// check for stamina
 		else if (this.getStamina() != this.getMaxStamina()){
 			double oneStaminaTime = this.getToughness()/(100d * 0.2d);
-			double newTimeT = this.getRestTime() - oneStaminaTime;
-			if (Util.fuzzyGreaterThanOrEqualTo(newTimeT, 0)){
-				this.setRestTime(newTimeT);
+			double newTime1 = this.getRestTime() - oneStaminaTime;
+			if (Util.fuzzyGreaterThanOrEqualTo(newTime1, 0)){
+				this.setRestTime(newTime1);
 				this.setStamina(this.getStamina() + 1);
 			}
 			return;
@@ -1278,7 +1307,7 @@ public class Unit {
 	
 	
 	/* AdvanceTime */
-	/** TODO: fuzzyequals gebruiken misschien
+	/** 
 	 * Check whether the given time is valid for any Unit
 	 *
 	 * @param 	time
@@ -1287,7 +1316,8 @@ public class Unit {
 	 * 			| result == ((time > 0) && (time < 0.2))
 	 */
 	public static boolean isValidTime(double time){
-        return (time > 0) && (time < 0.2);
+        return Util.fuzzyGreaterThanOrEqualTo(time, 0) && Util.fuzzyLessThanOrEqualTo(time, 0.2)
+        			&& (! Util.fuzzyEquals(time, 0)) && (! Util.fuzzyEquals(time, 0.2));
 	}
 
 	//TODO:advanceTime every unit rests automaticaly every 3 minutes
@@ -1301,8 +1331,6 @@ public class Unit {
 	 *
 	 * @post   This Unit  is terminated.
 	 *       | new.isTerminated()
-	 * @post   ...
-	 *       | ...
 	 */
 	 public void terminate() {
 		 this.isTerminated = true;
@@ -1327,7 +1355,7 @@ public class Unit {
 	 
 	 /* DefaultBehaviour*/
 	 
-	 /**TODO defaultdocumentatie
+	 /**
 	  * The Unit is in default behaviour mode
 	  * 
 	  * @post	the defaultBoolean is true
@@ -1340,7 +1368,7 @@ public class Unit {
 		 this.defaultBehaviour();
 	 }
 	 
-	 /**TODO defaultdocumentatie
+	 /**
 	  * The Unit is no longer in default behavior mode
 	  * 
 	  * @post	the defaultBoolean is false
@@ -1354,6 +1382,17 @@ public class Unit {
 	  * Determine the next behaviour 
 	  * 
 	  * @throws IllegalStateException
+	  * 		The unit is not in defaultbehaviour
+	  * 		| ! this.getDefaultBoolean()
+	  * @effect	1/3 of the times this method is called, the unit will work
+	  * 		| if (RandomNumberBetween0And1 <= 1/3)
+	  * 		|	this.work()
+	  * @effect 1/3 of the time this method is called, the unit will rest
+	  * 		| if (1/3 < RandomNumberBetween0And1 <= 2/3)
+	  * 		|	this.rest()
+	  * @effect	1/3 of the time this method is called, the unit will walk to a random location
+	  * 		| if (2/3 < RandomNumberBetween0And1)
+	  * 		|	this.moveToRandom()
 	  */
 	 private void defaultBehaviour() throws IllegalStateException{
 		if (! this.getDefaultBoolean())
