@@ -214,14 +214,88 @@ public class UnitTest {
 	}
 	
 	@Test
-	public void testCanAttack$FalceCase(){
+	public void testCanAttack$FalseCase(){
 		otherUnit.setPosition(new Vector3d(9d,1d,25d));
 		testingUnit.setPosition(new Vector3d(25d,25d,25d));
 		assertFalse(testingUnit.canAttack(otherUnit));
 		assertFalse(otherUnit.canAttack(testingUnit));
 	}
 	
+	@Test
+	public void testGetBaseSpeed(){
+		testingUnit.setStrength(100);
+		testingUnit.setAgility(100);
+		testingUnit.setStrength(100);
+		assertTrue(Util.fuzzyEquals(testingUnit.getBaseSpeed(), 1.5));
+	}
 	
+	@Test
+	public void testGetSpeed(){
+		testingUnit.setStatus(UnitStatus.WALKING);
+		testingUnit.setFinalDestination(new Vector3d(25d, 26d, 25d));
+		assertTrue(Util.fuzzyEquals(testingUnit.getSpeed(), testingUnit.getBaseSpeed()));
+	}
+	@Test
+	public void testStartSprint(){
+		testingUnit.startSprint();
+		assertEquals(UnitStatus.SPRINTING, testingUnit.getStatus());
+	}
+	@Test
+	public void testStopSprint(){
+		testingUnit.startSprint();
+		testingUnit.stopSprint();
+		assertEquals(UnitStatus.IDLE, testingUnit.getStatus());
+	}
+	@Test
+	public void testCanSprint$TrueCase(){
+		testingUnit.setStatus(UnitStatus.WALKING);
+		assertTrue(testingUnit.canSprint());
+	}
+	@Test
+	public void testCanSprint$FalseCaseBadStatus(){
+		testingUnit.setStatus(UnitStatus.IDLE);
+		assertFalse(testingUnit.canSprint());
+	}
+	@Test
+	public void testCanSprint$FalseCaseBadStamina(){
+		testingUnit.setStamina(0);
+		assertFalse(testingUnit.canSprint());
+	}
+	@Test
+	public void testIsMoving$TrueCaseWalking(){
+		testingUnit.setStatus(UnitStatus.WALKING);
+		assertTrue(testingUnit.isMoving());
+	}
+	@Test
+	public void testIsMoving$TrueCaseSPRINTING(){
+		testingUnit.setStatus(UnitStatus.SPRINTING);
+		assertTrue(testingUnit.isMoving());
+	}
+	@Test
+	public void testIsMoving$FalseCase(){
+		testingUnit.setStatus(UnitStatus.IDLE);
+		assertFalse(testingUnit.isMoving());
+	}
+	
+	@Test
+	public void testUpdatePosition(){
+		assertTrue(true);
+	}
+	
+	@Test
+	public void testMoveTo(){
+		assertTrue(true);
+	}
+	
+	@Test
+	public void testMoveToAdjacent(){
+		assertTrue(true);
+	}
+	
+	@Test
+	public void testDodge(){
+		assertTrue(true);
+	}
 	
 	@Test
 	public void testGetWeight(){
