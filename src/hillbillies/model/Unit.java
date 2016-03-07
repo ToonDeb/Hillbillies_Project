@@ -1735,6 +1735,10 @@ public class Unit {
 			this.rest3MinTime = this.rest3MinTime + deltaT;
 		}
 		
+		if ((this.getStatus() == UnitStatus.IDLE) && (this.getDefaultBoolean() == true)){
+			this.defaultBehaviour();
+		}
+		
 	}
 	
 	private double rest3MinTime;
