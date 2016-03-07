@@ -845,14 +845,12 @@ public class Unit {
 		double vbase = this.getBaseSpeed();
 		double v;
 		UnitStatus status = this.getStatus();
-		
-		if (this.getOrigin()[2] - this.getAdjacentDestination().z == -1)
-				v = (double) (0.5*vbase);
-		else if (this.getOrigin()[2] - this.getAdjacentDestination().z== 1)
-				v = (double) (1.2*vbase);
+		if (this.getOrigin()[2] - this.getAdjacentDestination().z + 0.5 < 0)
+			v = (double) (0.5*vbase);
+		else if (this.getOrigin()[2] - this.getAdjacentDestination().z + 0.5 > 0)
+			v = (double) (1.2*vbase);
 		else
-				v = vbase;
-		
+			v = vbase;
 		
 		if (status == UnitStatus.SPRINTING)
 				return (double) 2*v;
